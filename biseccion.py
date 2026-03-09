@@ -55,11 +55,11 @@ def mostrar_info():
     col1, col2 = st.columns(2)
     with col1:
         inf = st.number_input('Ingresar intervalo inferior',value=-10.0,step=0.5)
+        sup = st.number_input('Ingresar intervalo superior',value=10.0,step=0.5)
+    with col2:
+        max_i = st.number_input('Ingresar cantidad de iteraciones',min_value=1,max_value=30,value=5)
         err = st.number_input('Exponente de tolerancia de error $E = 10^{-n}$',value=2,min_value=1, max_value=10)
         err = 10**(-err)
-    with col2:
-        sup = st.number_input('Ingresar intervalo superior',value=10.0,step=0.5)
-        max_i = st.number_input('Ingresar cantidad de iteraciones',min_value=1,max_value=30,value=5)
     try:
         x = np.linspace(inf, sup, 100)
         y = ec.evaluar_f(formula,x)
@@ -93,25 +93,6 @@ def mostrar_info():
 
     st.divider()
     st.header('Código hecho en Python')
-    st.subheader('Hecho con recursividad')
-
-    st.code('''
-def biseccion(a,b,err,max_i):
-# Casos base
-if f(a)*f(b)>0:
-    return None
-x = (a+b)/2
-if abs(f(x)) < err or max_i<=0: 
-    return x
-# Opciones
-if f(x) * f(a) < 0:
-    x = biseccion(a,x,err,max_i-1)
-else:
-    x = biseccion(x,b,err,max_i-1)
-return x''',
-            "python")
-    
-    st.subheader('Hecho con un ciclo for')
     st.code('''
 def biseccion(f,a,b,err,max_i):
     fa = f(a)
