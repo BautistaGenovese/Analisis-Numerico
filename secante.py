@@ -26,9 +26,9 @@ def secante(f,a,b,err):
     """for _ in range(1, max_i+1):
         x = b - (fb * (b-a))/(fb - fa)
         fx = ec.evaluar_f(f,x)"""
-    
+    valor_anterior= a
     while True :
-        valor_anterior= b
+        
         x = b - (fb * (b - a)) / (fb - fa)
         fx = ec.evaluar_f(f, x)
 
@@ -43,7 +43,7 @@ def secante(f,a,b,err):
 
         if abs(fx) < err: 
             return x, cuadro
-        
+        valor_anterior= x
         # Opciones
         if fx * fa < 0:
             b = x
