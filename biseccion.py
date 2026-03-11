@@ -2,7 +2,7 @@ import streamlit as st
 import utils as ec
 import pandas as pd
 import plotly.graph_objects as go
-import grafico
+import grafico, comparativa
 
 def biseccion(f,a,b,err):
     cuadro = {
@@ -58,7 +58,7 @@ def mostrar_info():
     st.caption("Usa `( )` para agrupar elementos. Por ejemplo `e^(1-x)` para $$ e^{1-x}$$.")
     
     st.latex(ec.mostrar_formula(formula))
-    
+
     col1, col2, col3 = st.columns(3)
     with col1:
         inf = st.number_input('Ingresar intervalo inferior',value=-10.0,step=2.0)
@@ -71,14 +71,18 @@ def mostrar_info():
         raiz, datos = biseccion(formula,inf,sup,err)
 
         if raiz is not None:
-            st.success(f'Raíz encontrada en: $$x ≈ {round(raiz,6)}$$')
+            comparar = st.checkbox("Comparar con Secante")
+            if comparar:
+                comparativa.comparar_sec_bis(formula,inf,sup,err)
+            else:
+                st.success(f'Raíz encontrada en: $$x ≈ {round(raiz,6)}$$')
 
-            grafico.dibujar(formula, raiz, inf, sup)
+                grafico.dibujar(formula, raiz, inf, sup,key="grafico_unico")
+                    
+                mostrar_datos = st.checkbox("Mostrar datos de iteraciones")
                 
-            mostrar_datos = st.checkbox("Mostrar datos de iteraciones")
-            
-            if mostrar_datos:
-                st.dataframe(pd.DataFrame(datos))
+                if mostrar_datos:
+                    st.dataframe(pd.DataFrame(datos))          
         else:
             st.error('No se ha encontrado la raíz.')
 

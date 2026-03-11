@@ -1,5 +1,5 @@
 import streamlit as st
-import grafico
+import grafico, comparativa
 import utils as ec
 import pandas as pd
 
@@ -73,13 +73,19 @@ def mostrar_info():
         raiz, datos = secante(formula,inf,sup,err)
         
         if raiz is not None:
-            st.success(f'Raíz encontrada en: $$x ≈ {round(raiz,6)}$$')
+            comparar = st.checkbox("Comparar con Bisección")
+            
+            if comparar:
+                comparativa.comparar_sec_bis(formula,inf,sup,err)
+            else:
+                st.success(f'Raíz encontrada en: $$x ≈ {round(raiz,6)}$$')
 
-            grafico.dibujar(formula, raiz, inf, sup)
-
-            mostrar_datos = st.checkbox("Mostrar datos de iteraciones")
-            if mostrar_datos:
-                st.dataframe(pd.DataFrame(datos))
+                grafico.dibujar(formula, raiz, inf, sup,key="grafico_unico")
+                    
+                mostrar_datos = st.checkbox("Mostrar datos de iteraciones")
+                
+                if mostrar_datos:
+                    st.dataframe(pd.DataFrame(datos))
         else:
             st.error('No se ha encontrado la raíz.')
 

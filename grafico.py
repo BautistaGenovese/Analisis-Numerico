@@ -3,7 +3,7 @@ import streamlit as st
 import numpy as np
 import utils as ec
 
-def dibujar(f, raiz, inf, sup):
+def dibujar(f, raiz, inf, sup, key=None):
     # Calculamos la distancia más larga desde la raíz a los extremos
     # para que al usarla en ambos lados, la raíz quede en el centro exacto.
     distancia_a_inf = abs(raiz - inf)
@@ -78,7 +78,8 @@ def dibujar(f, raiz, inf, sup):
     )
     st.plotly_chart(
                 fig, 
-                use_container_width=True, 
+                use_container_width=True,
+                key=key,
                 config={
                     'scrollZoom': False,
                     'displayModeBar': True,
