@@ -1,5 +1,5 @@
 import streamlit as st
-import matplotlib.pyplot as plt
+import grafico
 import numpy as np
 import utils as ec
 import pandas as pd
@@ -74,21 +74,17 @@ def mostrar_info():
         x = np.linspace(inf, sup, 100)
         y = ec.evaluar_f(formula,x)
         
-        fig, ax = plt.subplots()
-        p_x, datos = secante(formula,inf,sup,err)
+        raiz, datos = secante(formula,inf,sup,err)
         
-        if p_x is not None:
-            ax.scatter(p_x,0.0,color='green', s=30, zorder=5, label="Punto aproximado")
-            st.success(f'Raíz encontrada en: $$x ≈ {round(p_x,6)}$$')
+        if raiz is not None:
+            st.success(f'Raíz encontrada en: $$x ≈ {round(raiz,6)}$$')
 
-            ax.plot(x, y, label='$f (x)$', color='skyblue', linewidth=2)
-            ax.set_xlabel("Eje X")
-            ax.set_ylabel("Eje Y")
-            ax.legend()
-            ax.grid(True)
-            
-            # Mostrar la figura en Streamlit
-            st.pyplot(fig)
+            st.plotly_chart(
+                grafico.dibujar(formula,raiz,inf,sup),
+                config={
+                'scrollZoom': False,
+                'staticPlot': False
+            })
 
             mostrar_datos = st.checkbox("Mostrar datos de iteraciones")
             if mostrar_datos:
