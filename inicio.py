@@ -7,6 +7,22 @@ def cargar_lottie_local(ruta_archivo: str):
     with open(ruta_archivo, "r", encoding="utf-8") as f:
         return json.load(f)
 def inicio():
+
+    # 1. CSS para sacar los márgenes blancos y que la imagen toque los bordes
+    #st.markdown("""
+    #    <style>
+    #    /* Esto elimina el espacio en blanco de arriba y los costados */
+    #    .block-container {
+    #        padding-top: 0rem !important;
+    #        padding-bottom: 0rem !important;
+    #    }
+    #    </style>
+    #""", unsafe_allow_html=True)
+
+    # 2. Cargamos la imagen de portada
+    # Asegurate de poner la ruta correcta donde guardaste tu imagen
+    #st.image("fondoCalculadoras.jpg", use_container_width=True)"""
+
     lottie_welcome = cargar_lottie_local("animaciones/Welcome.json")
     st.markdown('<div style="display: flex; justify-content: center;">', unsafe_allow_html=True)
     if lottie_welcome:
@@ -25,45 +41,44 @@ def inicio():
 
     st.subheader("Métodos de búsqueda de raíces")
 
+    # --- CSS ACTUALIZADO PARA 5 COLUMNAS ---
     st.markdown("""
         <style>
-        /* Apuntamos a la clase genérica de botones de Streamlit */
+        /* Diseño base de los botones */
         .stButton > button {
-            height: 100px;
+            height: 110px;
             border-radius: 10px;
             border: none;
             transition: 0.3s;
         }
-                
+        
+        /* Letra de los botones (un poco más chica para que entren 3 por fila) */
         .stButton > button p {
-            font-size: 28px !important; 
-            font-family: 'Stoked', sans-serif !important; 
+            font-size: 24px !important; 
+            font-family: 'Verdana', sans-serif !important; 
             font-weight: bold !important;
             color: white !important;
         }
-                
-        /* --- COLUMNA 1 (Izquierda) --- */
+
         /* 1er botón (Bisección) - Rojo */
-        div[data-testid="stColumn"]:nth-of-type(1) div.element-container:nth-of-type(1) .stButton > button { background-color: #FF4B4B !important; }
-        div[data-testid="stColumn"]:nth-of-type(1) div.element-container:nth-of-type(1) .stButton > button:hover { background-color: #ff7676 !important; }
+        div[data-testid="stColumn"]:nth-of-type(1) .stButton > button { background-color: #FF4B4B !important; }
+        div[data-testid="stColumn"]:nth-of-type(1) .stButton > button:hover { background-color: #ff7676 !important; }
 
-        /* 2do botón (Newton) - Azul */
-        div[data-testid="stColumn"]:nth-of-type(1) div.element-container:nth-of-type(2) .stButton > button { background-color: #0078D7 !important; }
-        div[data-testid="stColumn"]:nth-of-type(1) div.element-container:nth-of-type(2) .stButton > button:hover { background-color: #3b9cfa !important; }
+        /* 2do botón (Regula Falsi) - Verde */
+        div[data-testid="stColumn"]:nth-of-type(2) .stButton > button { background-color: #00CC96 !important; }
+        div[data-testid="stColumn"]:nth-of-type(2) .stButton > button:hover { background-color: #33d6a8 !important; }
 
-        /* 3er botón (Regula Falsi) - Violeta */
-        div[data-testid="stColumn"]:nth-of-type(1) div.element-container:nth-of-type(3) .stButton > button { background-color: #9325c2 !important; }
-        div[data-testid="stColumn"]:nth-of-type(1) div.element-container:nth-of-type(3) .stButton > button:hover { background-color: #b44ce0 !important; }
-        
-        /* --- COLUMNA 2 (Derecha) --- */
-        /* 1er botón (Secante) - Verde */
-        div[data-testid="stColumn"]:nth-of-type(2) div.element-container:nth-of-type(1) .stButton > button { background-color: #10c45b !important; }
-        div[data-testid="stColumn"]:nth-of-type(2) div.element-container:nth-of-type(1) .stButton > button:hover { background-color: #6ae68f !important; }
+        /* 3er botón (Newton) - Azul */
+        div[data-testid="stColumn"]:nth-of-type(3) .stButton > button { background-color: #0078D7 !important; }
+        div[data-testid="stColumn"]:nth-of-type(3) .stButton > button:hover { background-color: #3b9cfa !important; }
 
-        /* 2do botón (Tangente) - Naranja */
-        div[data-testid="stColumn"]:nth-of-type(2) div.element-container:nth-of-type(2) .stButton > button { background-color: #FFA500 !important; }
-        div[data-testid="stColumn"]:nth-of-type(2) div.element-container:nth-of-type(2) .stButton > button:hover { background-color: #ffc04d !important; }        
-        
+        /* 4to botón (Secante) - Naranja */
+        div[data-testid="stColumn"]:nth-of-type(4) .stButton > button { background-color: #FFA500 !important; }
+        div[data-testid="stColumn"]:nth-of-type(4) .stButton > button:hover { background-color: #ffc04d !important; }
+
+        /* 5to botón (Tangente) - Violeta */
+        div[data-testid="stColumn"]:nth-of-type(5) .stButton > button { background-color: #8A2BE2 !important; }
+        div[data-testid="stColumn"]:nth-of-type(5) .stButton > button:hover { background-color: #a454f0 !important; }
         </style>
     """, unsafe_allow_html=True)
 
@@ -77,26 +92,36 @@ def inicio():
     def ir_a_newton():
         st.session_state.pagina_actual = "Newton"
 
-    def ir_a_regulafalsi():
+    def ir_a_puntofijo():
         pass
 
     def ir_a_tangente():
         pass
 
-    # --- 3. BOTONES ---
+    # --- SECCIÓN 1: MÉTODOS CERRADOS ---
+    st.markdown("### Métodos Cerrados")
     col1, col2 = st.columns(2)
 
     with col1:
-        btn_biseccion = st.button("Bisección", use_container_width=True, on_click=ir_a_biseccion)
-        btn_newton = st.button("Newton", use_container_width=True, on_click = ir_a_newton)
-        btn_regulafalsi = st.button("Regula Falsi", use_container_width=True, on_click = ir_a_regulafalsi)
+        st.button("Bisección", use_container_width=True, on_click=ir_a_biseccion)
     with col2:
-        btn_secante = st.button("Secante", use_container_width=True, on_click=ir_a_secante)
-        btn_tangente = st.button("Tangente", use_container_width=True, on_click = ir_a_tangente)
+        st.button("Secante", use_container_width=True, on_click=ir_a_secante) 
+
+    st.write("") # Un espacio en blanco para separar un poco
+
+    # --- SECCIÓN 2: MÉTODOS ABIERTOS ---
+    st.markdown("### Métodos Abiertos")
+    col3, col4, col5 = st.columns(3)
+
+    with col3:
+        st.button("Newton", use_container_width=True, on_click=ir_a_newton)
+    with col4:
+        st.button("Punto Fijo", use_container_width=True, on_click=ir_a_puntofijo)
+    with col5:
+        st.button("Tangente", use_container_width=True, on_click=ir_a_tangente)
+
     
         
-
-
 
     #st.header('Introducción')
     st.write("""
