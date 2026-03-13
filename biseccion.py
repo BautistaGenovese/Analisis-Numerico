@@ -64,7 +64,7 @@ def img_to_base64(path):
 
 def mostrar_info():
 
-<<<<<<< HEAD
+
     # 1. Plantamos una bandera invisible bien arriba
     st.markdown("<span id='banderita-tope'></span>", unsafe_allow_html=True)
 
@@ -142,8 +142,7 @@ def mostrar_info():
         st.session_state.pagina_actual = "Inicio"
         st.rerun() # Esto fuerza a la página a recargarse instantáneamente
 
-=======
->>>>>>> f4431d69df8295478151a6335b022702da6ca7a4
+
     st.header('Metodo Bisección')
     
     formula = st.text_input('Escribe tu función $f(x)$:', value='x**2 + 11*x - 6')
