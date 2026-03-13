@@ -5,4 +5,3 @@ numpy
 sympy
 plotly
 streamlit_lottie
-base64 (para las páginas de las calculadoras)
