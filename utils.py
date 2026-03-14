@@ -33,4 +33,4 @@ def mostrar_formula(formula):
 
     f = f.replace('*', r' \cdot ')
 
-    return f'\\displaystyle f(x) = {f}'
+    return f'f(x) = {f}'

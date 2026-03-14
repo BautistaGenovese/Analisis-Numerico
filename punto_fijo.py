@@ -38,21 +38,23 @@ def punto_fijo (g,x0,max_i=100):
 
 def mostrar_info():
     
+    st.header('Metodo Punto Fijo')
+    
     st.info("""
-    Para este método, debes ingresar la función ya despejada **g(x)**. 
+    Para este método, debes ingresar la función ya despejada $$g(x)$$. 
     Recuerda que estamos buscando la raíz de $f(x) = 0$ resolviendo $x = g(x)$.
     """)
     
     formula_g = st.text_input('Escribe tu función despejada $g(x)$:', value='(x + 2)**(0.5)')
     st.caption("Ejemplo: Si tu $f(x) = x^2 - x - 2 = 0$, una forma de $g(x)$ es `(x + 2)**0.5` o `(x**2 - 2)`.")
     
-    st.latex(ec.mostrar_formula(formula_g))
+    st.latex('g(x)'+ec.mostrar_formula(formula_g)[4:])
     
     col1, col2 = st.columns(2)
     with col1:
-        x_inicial = st.number_input('Ingresar punto de inicio (x0)', value=1.0, step=0.5)
+        x_inicial = st.number_input('Ingresar punto de inicio $$(x_0)$$', value=1.0, step=0.5)
     with col2:
-        err_input = st.number_input('Exponente de tolerancia de error', value=4, min_value=1, max_value=10)
+        err_input = st.number_input('Tolerancia de error $E = 10^{-n}$', value=4, min_value=1, max_value=10)
         err = 10**(-err_input)
         
     try:
@@ -62,13 +64,15 @@ def mostrar_info():
             opciones = ["Mostrar datos de iteraciones"]
             
             # 1. Agregamos selection_mode y un default vacío
-            seleccion = st.pills(
-                label="Opciones de visualización:", 
-                options=opciones, 
-                key="pills_pf",
-                selection_mode='multi',
-                default=[]
-            )
+            # seleccion = st.pills(
+            #     label="Opciones de visualización:", 
+            #     options=opciones, 
+            #     key="pills_pf",
+            #     selection_mode='multi',
+            #     default=[]
+            # )
+            
+            mostrar_datos = st.checkbox("Mostrar datos de iteraciones")
             
             if convergio:
                 st.success(f'El método CONVERGIÓ. Raíz aproximada: $$x ≈ {round(raiz,6)}$$')
@@ -77,7 +81,7 @@ def mostrar_info():
                 st.warning(f'Último valor calculado: $x = {round(raiz, 6)}$')
 
             # Guardamos la validación en una variable segura
-            mostrar_datos = "Mostrar datos de iteraciones" in seleccion
+            # mostrar_datos = "Mostrar datos de iteraciones" in seleccion
 
             # Dibujamos el gráfico
             grafico.dibujar(
@@ -88,15 +92,7 @@ def mostrar_info():
                 key="grafico_pf", 
                 iteraciones=datos if mostrar_datos else None
             )
-            # grafico.dibujar_abierto(
-            #     f=formula_g, 
-            #     raiz=raiz, 
-            #     x0=x_inicial, 
-            #     key="grafico_pf", 
-            #     iteraciones=datos if mostrar_datos else None,
-            #     es_punto_fijo=True
-            # )
-            
+
             # Mostramos la tabla si corresponde
             if mostrar_datos:
                 df = pd.DataFrame(datos)

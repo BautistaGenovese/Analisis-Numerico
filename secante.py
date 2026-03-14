@@ -69,7 +69,7 @@ def mostrar_info():
     with col2:
         sup = st.number_input('Ingresar intervalo superior',value=10.0,step=2.0)
     with col3:
-        err = st.number_input('Exponente de tolerancia de error',value=2,min_value=1, max_value=10)
+        err = st.number_input('Tolerancia de error $E = 10^{-n}$',value=2,min_value=1, max_value=10)
         err = 10**(-err)
     try:
         # Asumo que tu función se llama secante() adentro de secante.py

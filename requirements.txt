@@ -1,5 +1,6 @@
 streamlit
 streamlit-pdf-viewer
+streamlit[pdf]
 pandas
 numpy
 sympy
