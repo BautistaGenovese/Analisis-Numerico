@@ -5,69 +5,60 @@ import inicio, biseccion, secante, newton, punto_fijo, regresion
 st.set_page_config(
     page_title='App Análisis Numerico',
     page_icon='📊',
-    )
+    layout='wide' # <--- ESTO EXPANDE LA APP A TODA LA PANTALLA
+)
+
+# --- CÓDIGO PARA OCULTAR LA BARRA SUPERIOR Y EL FOOTER ---
+ocultar_menu_estilo = """
+    <style>
+    /* Oculta la barra superior */
+    header {visibility: hidden;}
+    
+    /* Oculta el pie de página predeterminado de Streamlit (opcional) */
+    footer {visibility: hidden;}
+    
+    /* Reduce el espacio en blanco que queda arriba */
+    .block-container {
+        padding-top: 1rem;
+        padding-bottom: 0rem;
+    }
+    </style>
+"""
+st.markdown(ocultar_menu_estilo, unsafe_allow_html=True)
+# ---------------------------------------------------------
 
 mostrar_tp = False
 
 def main():
 
-    st.title('App Análisis Numérico 📊')
-
-    choice = st.segmented_control(
-        "Selecciona el módulo:",
-        options=["Inicio", "Bisección","Secante","Punto Fijo","Newton","Regresión"],
-        default="Inicio",
-        selection_mode='single'
-    )
-
-    if choice == 'Bisección':
-        mostrar_tp = st.checkbox("Mostrar Consigna del TP")
-        if mostrar_tp:
-            st.pdf("archivos/Consigna Tp 1 inf tele.pdf")
-        biseccion.mostrar_info()
-    elif choice == 'Secante':
-        mostrar_tp = st.checkbox("Mostrar Consigna del TP")
-        if mostrar_tp:
-            st.pdf("archivos/Consigna Tp 1 inf tele.pdf")
-        secante.mostrar_info()
-    elif choice == 'Punto Fijo':
-        mostrar_tp = st.checkbox("Mostrar Consigna del TP")
-        if mostrar_tp:
-            st.pdf("archivos/Consigna Tp 1 inf tele.pdf")
-        punto_fijo.mostrar_info()
-    elif choice == 'Newton':
-        mostrar_tp = st.checkbox("Mostrar Consigna del TP")
-        if mostrar_tp:
-            st.pdf("archivos/Consigna Tp 1 inf tele.pdf")
-        newton.mostrar_info()
-    elif choice == 'Regresión':
-        mostrar_tp = st.checkbox("Mostrar Consigna del TP")
-        if mostrar_tp:
-            st.pdf("archivos/Consigna Tp 1 inf tele.pdf")
-        regresion.mostrar_info()
-    
-    else:
+    col1, col2 = st.columns(2)
+    with col1:
+        st.title('App Análisis Numérico 📊')
+    with col2:
+        choice = st.pills(
+            "Selecciona el módulo:",
+            options=["Inicio", "Bisección","Secante","Newton","Punto Fijo","Regresión"],
+            default="Inicio",
+            selection_mode='single'
+        )
+    if choice == 'Inicio' or choice is None:
         inicio.inicio()
-    
-    # if "pagina_actual" not in st.session_state:
-    #     st.session_state.pagina_actual = "Inicio"
+    else:
+        if st.checkbox("Mostrar Consigna del TP"):
+            st.pdf("archivos/Consigna Tp 1 inf tele.pdf")
 
-    # if st.session_state.pagina_actual == "Inicio":
-    #     inicio.inicio()
+        st.divider()  # Línea divisoria para separar la selección del contenido
 
-    # elif st.session_state.pagina_actual == "Bisección":
-    # # Acá llamas a la función real que arma tu archivo biseccion.py
-    #     biseccion.mostrar_info()
+        if choice == 'Bisección':
+            biseccion.mostrar_info()
+        elif choice == 'Secante':
+            secante.mostrar_info()
+        elif choice == 'Punto Fijo':
+            punto_fijo.mostrar_info()
+        elif choice == 'Newton':
+            newton.mostrar_info()
+        elif choice == 'Regresión':
+            regresion.mostrar_info()
 
-    # elif st.session_state.pagina_actual == "Secante":
-    # # Acá llamas a la función real que arma tu archivo secante.py
-    #     secante.mostrar_info()
-
-    # elif st.session_state.pagina_actual == "Newton":
-    # # Cambiá "mostrar_newton()" por el nombre real de tu función
-    #     newton.mostrar_info()
-    # elif st.session_state.pagina_actual == "Punto Fijo":
-    # # Cambiá "mostrar_newton()" por el nombre real de tu función
-    #     punto_fijo.mostrar_info()
 if __name__ == '__main__':
     main()
