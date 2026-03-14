@@ -73,40 +73,42 @@ def mostrar_info():
     try:
         raiz, datos = biseccion(formula, inf, sup, err)
 
-        if raiz is not None:
-            opciones_comp = ["Newton", "Secante"]
-            seleccion = st.pills(
-                label="Comparar con:", 
-                options=opciones_comp, 
-                key="pills_bis", 
-                selection_mode='single'
-            )
-            
-            mostrar_datos = st.checkbox("Mostrar datos de iteraciones")
+        with st.spinner('Generando Grafica...'):
+            if raiz is not None:
+                opciones_comp = ["Newton", "Secante"]
+                seleccion = st.pills(
+                    label="Comparar con:", 
+                    options=opciones_comp, 
+                    key="pills_bis", 
+                    selection_mode='single'
+                )
+                
+                mostrar_datos = st.checkbox("Mostrar datos de iteraciones")
 
-            if seleccion == "Newton":
-                st.info("Para comparar con Newton, necesitamos un valor inicial $x_n$:")
-                # Le damos el punto medio del intervalo por defecto, que tiene sentido matemático
-                x_n_comp = st.number_input('Ingresar valor inicial $x_n$', value=(inf+sup)/2, step=1.0)
-                comparativa.comparar_generico("Bisección", "Newton", formula, err, mostrar_datos, inf=inf, sup=sup, x_n=x_n_comp)
-                
-            elif seleccion == "Secante":
-                comparativa.comparar_generico("Bisección", "Secante", formula, err, mostrar_datos, inf=inf, sup=sup)
-                
+                if seleccion == "Newton":
+                    st.info("Para comparar con Newton, necesitamos un valor inicial $x_n$:")
+                    # Le damos el punto medio del intervalo por defecto, que tiene sentido matemático
+                    x_n_comp = st.number_input('Ingresar valor inicial $x_n$', value=(inf+sup)/2, step=1.0)
+                    comparativa.comparar_generico("Bisección", "Newton", formula, err, mostrar_datos, inf=inf, sup=sup, x_n=x_n_comp)
+                    
+                elif seleccion == "Secante":
+                    comparativa.comparar_generico("Bisección", "Secante", formula, err, mostrar_datos, inf=inf, sup=sup)
+                    
+                else:
+                    st.success(f'Raíz encontrada en: $$x \\approx {round(raiz,6)}$$')
+                    grafico.dibujar(
+                        formula, 
+                        raiz, 
+                        inf, 
+                        sup, 
+                        key="graf_unico_bis", 
+                        iteraciones=datos if mostrar_datos else None
+                        )
+                    
+                    if mostrar_datos:
+                        st.dataframe(pd.DataFrame(datos), use_container_width=True)          
             else:
-                st.success(f'Raíz encontrada en: $$x \\approx {round(raiz,6)}$$')
-                grafico.dibujar(
-                    formula, 
-                    raiz, 
-                    inf, 
-                    sup, 
-                    key="graf_unico_bis", 
-                    iteraciones=datos if mostrar_datos else None)
-                
-                if mostrar_datos:
-                    st.dataframe(pd.DataFrame(datos), use_container_width=True)          
-        else:
-            st.error('No se ha encontrado la raíz o no hay cambio de signo en el intervalo.')
+                st.error('No se ha encontrado la raíz o no hay cambio de signo en el intervalo.')
 
     except Exception as e:
         st.error(f'Error en la fórmula: {e}')
