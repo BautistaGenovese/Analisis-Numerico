@@ -39,6 +39,10 @@ def punto_fijo (g,x0,max_i=100):
     return x_actual, cuadro, False
 
 def mostrar_info():
+    
+    if st.button("⬅️ Volver al Inicio"):
+        st.session_state.pagina_actual = "Inicio"
+    st.rerun() # Esto fuerza a la página a recargarse instantáneamente
     st.header('Método del Punto Fijo')
     
     st.info("""

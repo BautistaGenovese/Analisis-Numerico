@@ -58,5 +58,8 @@ def main():
     elif st.session_state.pagina_actual == "Newton":
     # Cambiá "mostrar_newton()" por el nombre real de tu función
         newton.mostrar_info()
+    elif st.session_state.pagina_actual == "Punto Fijo":
+    # Cambiá "mostrar_newton()" por el nombre real de tu función
+        punto_fijo.mostrar_info()
 if __name__ == '__main__':
     main()

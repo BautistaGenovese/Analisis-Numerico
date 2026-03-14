@@ -77,8 +77,8 @@ def inicio():
     def ir_a_newton():
         st.session_state.pagina_actual = "Newton"
 
-    def ir_a_regulafalsi():
-        pass
+    def ir_a_punto_fijo():
+        st.session_state.pagina_actual = "Punto Fijo"
 
     def ir_a_tangente():
         pass
@@ -89,7 +89,7 @@ def inicio():
     with col1:
         btn_biseccion = st.button("Bisección", use_container_width=True, on_click=ir_a_biseccion)
         btn_newton = st.button("Newton", use_container_width=True, on_click = ir_a_newton)
-        btn_regulafalsi = st.button("Regula Falsi", use_container_width=True, on_click = ir_a_regulafalsi)
+        btn_punto_fijo = st.button("Punto Fijo", use_container_width=True, on_click = ir_a_punto_fijo)
     with col2:
         btn_secante = st.button("Secante", use_container_width=True, on_click=ir_a_secante)
         btn_tangente = st.button("Tangente", use_container_width=True, on_click = ir_a_tangente)
