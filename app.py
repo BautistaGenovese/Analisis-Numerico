@@ -5,49 +5,78 @@ from metodos import biseccion, secante, newton, punto_fijo, regresion
 st.set_page_config(
     page_title='App Análisis Numerico',
     page_icon='📊',
-    layout='wide' # <--- ESTO EXPANDE LA APP A TODA LA PANTALLA
+    layout='wide'
 )
 
-# --- CÓDIGO PARA OCULTAR LA BARRA SUPERIOR Y EL FOOTER ---
-ocultar_menu_estilo = """
+# --- CSS LIGERO (Rendimiento optimizado) ---
+estilo_seguro = """
     <style>
-    /* Oculta la barra superior */
-    header {visibility: hidden;}
+    /* Ocultar barra superior por defecto */
+    header {visibility: hidden !important;}
     
-    /* Oculta el pie de página predeterminado de Streamlit (opcional) */
-    footer {visibility: hidden;}
-    
-    /* Reduce el espacio en blanco que queda arriba */
+    /* Espaciado del contenido para que no choque con el footer */
     .block-container {
-        padding-top: 1rem;
-        padding-bottom: 0rem;
+        padding-top: 2rem !important; 
+        padding-bottom: 6rem !important; 
     }
-    </style>
-"""
-st.markdown(ocultar_menu_estilo, unsafe_allow_html=True)
-# ---------------------------------------------------------
 
-mostrar_tp = False
+    /* FOOTER OPTIMIZADO (Color sólido, sin blur que cause lag) */
+    .mi-footer {
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        background-color: #1A1C24; /* Color oscuro sólido */
+        color: #888888;
+        text-align: center;
+        padding: 12px 0;
+        font-size: 14px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        z-index: 999;
+    }
+    .mi-footer a { color: #1E88E5; text-decoration: none; font-weight: bold; }
+    .mi-footer a:hover { text-decoration: underline; }
+    </style>
+
+    <div class="mi-footer">
+        Desarrollado con ❤️ por el Grupo de Análisis Numérico | 
+        <a href="https://github.com/BautistaGenovese/Analisis-Numerico" target="_blank">Ver código en GitHub</a>
+    </div>
+"""
+st.markdown(estilo_seguro, unsafe_allow_html=True)
+# -----------------------------------------
 
 def main():
+    # ==========================================
+    # NAVBAR NATIVA CON RECUADRO
+    # ==========================================
+    with st.container(border=True): # Esto le da el marco lindo a la navbar
+        # vertical_alignment="center" centra el texto con los botones!
+        col_logo, col_nav = st.columns([1, 2], vertical_alignment="center") 
+        
+        with col_logo:
+            st.markdown("<h3 style='margin: 0;'>📊 Análisis Numérico</h3>", unsafe_allow_html=True)
+            
+        with col_nav:
+            choice = st.pills(
+                "Navegación",
+                options=["Inicio", "Bisección", "Secante", "Newton", "Punto Fijo", "Regresión"],
+                default="Inicio",
+                selection_mode='single',
+                label_visibility="collapsed"
+            )
 
-    col1, col2 = st.columns([2,1])
-    with col1:
-        st.title('App Análisis Numérico 📊')
-    with col2:
-        choice = st.pills(
-            "Selecciona el módulo:",
-            options=["Inicio", "Bisección","Secante","Newton","Punto Fijo","Regresión"],
-            default="Inicio",
-            selection_mode='single'
-        )
+    # Espacio separador
+    st.write("") 
+
+    # ==========================================
+    # CONTENIDO DE LA APP
+    # ==========================================
     if choice == 'Inicio' or choice is None:
         inicio.inicio()
     else:
-        if st.checkbox("Mostrar Consigna del TP"):
-            st.pdf("archivos/Consigna Tp 1 inf tele.pdf")
-
-        st.divider()  # Línea divisoria para separar la selección del contenido
+        if st.checkbox("📄 Mostrar Consigna del TP"):
+            st.pdf("archivos/Consigna Tp 1 inf tele.pdf") 
 
         if choice == 'Bisección':
             biseccion.mostrar_info()
