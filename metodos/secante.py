@@ -1,7 +1,6 @@
 import streamlit as st
-import grafico, comparativa
-import utils as ec
 import pandas as pd
+from core import grafico, comparativa, utils as ec
 
 @st.cache_data(show_spinner="Calculando telemetría...")
 def secante(f,a,b,err):

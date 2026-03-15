@@ -1,10 +1,7 @@
 import streamlit as st
 import pandas as pd
 import grafico
-# Importamos todos los métodos (agregá los que falten después)
-import biseccion
-import secante
-import newton
+from metodos import biseccion, secante, newton
 
 def comparar_generico(nombre_metodo1, nombre_metodo2, formula, err, mostrar_datos, **kwargs):
     """

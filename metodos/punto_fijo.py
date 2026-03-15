@@ -1,7 +1,6 @@
 import streamlit as st
-import grafico
-import utils as ec
 import pandas as pd
+from core import grafico, utils as ec
 
 @st.cache_data(show_spinner="Calculando iteraciones...")
 

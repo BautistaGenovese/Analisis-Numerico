@@ -46,20 +46,31 @@ Aplicación interactiva desarrollada en **Python + Streamlit** para la resoluci�
 ## 📂 Estructura del Proyecto
 
 ```
-Analisis-Numerico
+Analisis-Numerico/
+├── 📄 app.py              # Punto de entrada principal (Configuración de Streamlit)
+├── 📄 inicio.py           # Pantalla de bienvenida e información del equipo
 │
-├── archivos/
-├── app.py            # Archivo principal de la aplicación
-├── inicio.py         # Página de introducción
-├── biseccion.py      # Implementación del método de bisección
-├── ecuacion.py       # Evaluación y formateo de funciones
-└── requirements.txt  # Dependencias del proyecto
+├── 📂 metodos/            # Lógica de los algoritmos numéricos
+│   ├── 📄 biseccion.py    # Implementación del método de Bisección
+│   ├── 📄 secante.py      # Implementación del método de la Secante
+│   ├── 📄 newton.py       # Implementación del método de Newton-Raphson
+│   ├── 📄 punto_fijo.py   # Implementación del método de Punto Fijo
+│   └── 📄 regresion.py    # Cálculo de Regresión Lineal simple
+│
+├── 📂 core/               # Herramientas de soporte y visualización
+│   ├── 📄 comparativa.py  # Lógica para contrastar dos métodos en paralelo
+│   ├── 📄 grafico.py      # Generación de trazados interactivos con Plotly
+│   └── 📄 utils.py        # Evaluación de funciones y formateo LaTeX
+│
+├── 📂 archivos/           # Documentación PDF y consignas del TP
+├── 📂 animaciones/        # Archivos JSON para Lottie (Welcome.json)
+└── 📄 requirements.txt    # Librerías necesarias (NumPy, Pandas, Plotly, etc.)
 ```
 
 ## 🛠️ Tecnologías utilizadas
 - Python
 - Streamlit
 - NumPy
-- Matplotlib
+- Plotly
 - Pandas
 - SymPy

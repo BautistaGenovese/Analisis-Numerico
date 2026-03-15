@@ -1,6 +1,6 @@
 import streamlit as st
-from streamlit_pdf_viewer import pdf_viewer
-import inicio, biseccion, secante, newton, punto_fijo, regresion
+import inicio
+from metodos import biseccion, secante, newton, punto_fijo, regresion
 
 st.set_page_config(
     page_title='App Análisis Numerico',

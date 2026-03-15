@@ -1,7 +1,6 @@
 import streamlit as st
-import utils as ec
 import pandas as pd
-import grafico, comparativa
+from core import grafico, comparativa, utils as ec
 
 @st.cache_data(show_spinner="Calculando telemetría...")
 def biseccion(f,a,b,err):

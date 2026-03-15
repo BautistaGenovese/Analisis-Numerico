@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import statistics
-import grafico
+from core import grafico
 
 def agregar_dato():
     # Usamos los valores actuales de los inputs

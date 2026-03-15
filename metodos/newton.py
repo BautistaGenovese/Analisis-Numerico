@@ -1,12 +1,7 @@
-import sympy as sp
-import numpy as np
-import re
-import utils as ec
 import streamlit as st
-import comparativa, grafico
+import sympy as sp
 import pandas as pd
-import base64
-import streamlit.components.v1 as components
+from core import grafico, comparativa, utils as ec
 
 def newton(x_n,f,err):
    # Creamos el diccionario para guardar las iteraciones
