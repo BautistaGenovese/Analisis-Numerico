@@ -1,38 +1,42 @@
 import streamlit as st
-import pandas as pd
+import sympy as sp
 from core import grafico, utils as ut
+from core.historial import Historial
 
-@st.cache_data(show_spinner="Calculando iteraciones...")
-def punto_fijo (g,x0,max_i=100):
-    cuadro={
-        'x[i]':[],
-        'g(x[i])':[],
-        'Error Absoluto': []
-    }
-    x_actual= x0
-    i=0
-    while i < max_i:
+@st.cache_data(show_spinner=True)
+def punto_fijo (g,x0, err):
+   
+    datos = Historial(['x[i]','g(x[i])','Error Absoluto'])
+    
+    x_actual=x0
+    iteracion=0
+    while iteracion < 100:
         try:
-            x_nuevo=ut.evaluar_f(g, x_actual)
-
-            error_actual= abs(x_nuevo - x_actual)
-
-            cuadro['x[i]'].append(f'{x_actual:.6f}')
-            cuadro['g(x[i])'].append(f'{x_nuevo:.6f}')
-            cuadro['Error Absoluto'].append(f'{error_actual:.6f}')
-
-            if round(x_nuevo, 6) == round(x_actual, 6):
-                return x_nuevo, cuadro, True
+            x_nuevo = ut.evaluar_f(g, x_actual)
+            error_abs = abs(x_nuevo - x_actual)
             
-            if error_actual > 1e6:
-                return x_nuevo, cuadro, False
+            datos.agregar({
+            'x[i]':x_actual,
+            'g(x[i])':x_nuevo,
+            'Error Absoluto':error_abs
+            })
+            
+            # Sale si el error absoluto es demasiado grande
+            if error_abs > 1e6:
+                return x_nuevo, datos, False
+            
+            # |x_(i+1) - x_i| <= ε
+            if error_abs <= err:
+                
+                return x_nuevo, datos, True
             
             x_actual = x_nuevo
             
-        except Exception as e:
-            return None, cuadro, False
+        except Exception:
+            return None, datos, False
         
-    return x_actual, cuadro, False
+        iteracion+=1        
+    return x_actual, datos, False
 
 def mostrar_info():
     st.markdown("<h1 style='text-align: center;'>Método de Punto Fijo</h1>", unsafe_allow_html=True)
@@ -71,10 +75,6 @@ def mostrar_info():
                 st.latex('g(x)' + ut.mostrar_formula(formula_g)[4:])
             else:
                 
-                
-                st.warning('⚠️ Opción en desarrollo.')
-                
-                
                 formula_f = st.text_input('Escribe tu función original $f(x)$:', value='x**2 - x - 2')
                 st.caption("Transformación aplicada: $g(x) = x - f(x)$")
                 st.latex(ut.mostrar_formula(formula_f))
@@ -82,17 +82,6 @@ def mostrar_info():
                 # Generamos automáticamente el string de la nueva función g(x)
                 formula_g = f"x - ({formula_f})"
                 st.latex(f"g(x) = x - ({ut.mostrar_formula(formula_f)[7:]})") # Mostramos cómo quedó
-            
-            
-            # st.info("""
-            # Para este método, debes ingresar la función ya despejada $$g(x)$$. 
-            # Recuerda que estamos buscando la raíz de $f(x) = 0$, resolviendo $x = g(x)$.
-            # """)
-            
-            # formula_g = st.text_input('Escribe tu función despejada $g(x)$:', value='(x + 2)**(1/2)')
-            # st.caption("Ejemplo: Si tu $f(x) = x^2 - x - 2 = 0$, una forma de $g(x)$ es $(x + 2)^{1/2}$ o $(x^2 - 2)$.")
-            
-            # st.latex('g(x)'+ut.mostrar_formula(formula_g)[4:])
         
             c1, c2 = st.columns(2)
             with c1:
@@ -124,11 +113,11 @@ def mostrar_info():
                     inf=raiz-5,
                     sup=raiz+5,
                     key="grafico_pf", 
-                    iteraciones=datos if mostrar_datos else None
+                    iteraciones=datos.obtener_datos() if mostrar_datos else None
                 )
                 # Expander para la tabla
                 with st.expander("Ver tabla de iteraciones"):
-                    st.table(pd.DataFrame(datos))
+                    st.table(datos.obtener_dataframe())
             else:
                 st.error('Ocurrió un error matemático durante el cálculo (probablemente la función divergió hacia el infinito o hay raíces complejas).')
                     
@@ -137,16 +126,30 @@ def mostrar_info():
     st.divider()
     st.header('Lógica en Python (Punto Fijo)')
     st.code('''
-def punto_fijo(g, x_actual, tolerancia):
-    while True:
-        # Evaluamos x en la función g
-        x_nuevo = g(x_actual)
-        
-        # Comparamos los 6 decimales
-        if round(x_nuevo, 6) == round(x_actual, 6):
-            return x_nuevo
+def punto_fijo (x0, err):
+    
+    x_actual=x0
+    iteracion=0
+    while iteracion < 100:
+        try:
+            x_nuevo = g(x_actual)
+            # |x_(i+1) - x_i|
+            error_abs = abs(x_nuevo - x_actual)
+
+            # Sale si el error absoluto es demasiado grande
+            if error_abs > 1e6:
+                return x_nuevo
             
-        # El resultado se vuelve la nueva entrada
-        x_actual = x_nuevo
+            # |x_(i+1) - x_i| <= ε
+            if error_abs <= err:
+                return x_nuevo
+            
+            x_actual = x_nuevo
+            
+        except Exception:
+            return None
+        iteracion+=1  
+                 
+    return x_actual
     ''', "python") 
         

@@ -1,42 +1,43 @@
 import streamlit as st
 import sympy as sp
-import pandas as pd
 from core import grafico, comparativa, utils as ut
+from core.historial import Historial
+
+@st.cache_data(show_spinner="Calculando telemetría...")
 def newton(x_n,f,err):
    # Creamos el diccionario para guardar las iteraciones
-    cuadro = {
-        'x[i]': [],
-        'f(x[i])': [],
-        "f'(x[i])": [],
-        'x[i+1]': []
-    }
+    datos = Historial({'x[i]','f(x[i])',"f'(x[i])",'x[i+1]'})
     
-    while True:
+    iteracion=0
+    while iteracion < 100:
         fa = ut.evaluar_f(f, x_n)
         derivada = str(sp.diff(f, 'x'))
         d_evaluada = round(ut.evaluar_f(derivada, x_n), 6)
         
         # Evitamos la división por cero si la derivada da 0
         if d_evaluada == 0:
-            return None, cuadro
+            return None, datos
             
-        x_n1 = round(x_n - fa / d_evaluada, 6)
+        x_n1 = x_n - (fa / d_evaluada)
 
         # Guardamos los datos de esta vuelta en el cuadro
-        cuadro['x[i]'].append(x_n)
-        cuadro['f(x[i])'].append(fa)
-        cuadro["f'(x[i])"].append(d_evaluada)
-        cuadro['x[i+1]'].append(x_n1)
+        datos.agregar({
+            'x[i]':x_n,
+            'f(x[i])':fa,
+            "f'(x[i])":d_evaluada,
+            'x[i+1]':x_n1
+            })
 
         # Condición de corte
-        if abs(ut.evaluar_f(f, x_n1)) <= err:
-            return x_n1, cuadro
+        if abs(ut.evaluar_f(f, x_n1)) <= 1e-12:
+            return x_n1, datos
         
         # Condición de corte por si se estanca
-        if x_n == x_n1:
-            return x_n1, cuadro
+        if abs(x_n1 - x_n) <= err:
+            return x_n1, datos
         
-        x_n = x_n1
+        x_n=x_n1
+        iteracion+=1
 
 def mostrar_info():
     st.markdown("<h1 style='text-align: center;'>Método Newton</h1>", unsafe_allow_html=True)
@@ -68,7 +69,7 @@ def mostrar_info():
             st.latex(ut.mostrar_formula(formula))
             c1, c2 = st.columns(2)
             with c1:
-                x_n = st.number_input('Ingresar valor inicial $x_n$',value=-10.0,step=2.0)
+                x_n = st.number_input('Ingresar valor inicial $(x_n)$',value=-10.0,step=2.0)
             with c2:
                 err = st.number_input('Tolerancia de error: $ε = 10^{-n}$',value=2,min_value=1, max_value=10)
                 err = 10**(-err)
@@ -103,14 +104,14 @@ def mostrar_info():
             if 'raiz' in locals() and raiz is not None:
                 if seleccion == None:
                     st.space('small')
-                    st.success(f'Raíz encontrada en: $$x \\approx {round(raiz,6)}$$')
+                    st.success(f'Raíz encontrada en: $$x {round(raiz,6)}$$')
                     inf_grafico = raiz - 5
                     sup_grafico = raiz + 5
-                    grafico.dibujar(formula, raiz, inf_grafico, sup_grafico, key="graf_unico_newton", iteraciones=datos if mostrar_datos else None)
+                    grafico.dibujar(formula, raiz, inf_grafico, sup_grafico, key="graf_unico_newton", iteraciones=datos.obtener_datos() if mostrar_datos else None)
                     
                     # Expander para la tabla
                     with st.expander("Ver tabla de iteraciones"):
-                        st.table(pd.DataFrame(datos))  
+                        st.table(datos.obtener_dataframe())  
                             
                 else:
                     comparativa.comparar_generico("Newton", seleccion, formula, err, mostrar_datos, x_n=x_n, inf=inf, sup=sup)
@@ -126,24 +127,27 @@ def mostrar_info():
     st.code('''
 def newton(x_n,f,err):
     
+    # Calculo de la raíz
+    iteracion=0
     while True:
-        fa = ec.evaluar_f(f, x_n)
+        fa = ut.evaluar_f(f, x_n)
         derivada = str(sp.diff(f, 'x'))
-        d_evaluada = round(ec.evaluar_f(derivada, x_n), 6)
+        d_evaluada = round(ut.evaluar_f(derivada, x_n), 6)
         
         # Evitamos la división por cero si la derivada da 0
         if d_evaluada == 0:
-            return None, cuadro
+            return None, datos
             
-        x_n1 = round(x_n - fa / d_evaluada, 6)
+        x_n1 = x_n - (fa / d_evaluada)
 
         # Condición de corte
-        if abs(ec.evaluar_f(f, x_n1)) <= err:
-            return x_n1, cuadro
+        if abs(ut.evaluar_f(f, x_n1)) <= 1e-12:
+            return x_n1, datos
         
         # Condición de corte por si se estanca
-        if x_n == x_n1:
-            return x_n1, cuadro
+        if abs(x_n1 - x_n) <= err:
+            return x_n1, datos
         
-        x_n = x_n1''',
+        x_n=x_n1
+        iteracion+=1''',
             "python")

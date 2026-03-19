@@ -1,48 +1,51 @@
 import streamlit as st
-import pandas as pd
 from core import grafico, comparativa, utils as ut
+from core.historial import Historial
 
 @st.cache_data(show_spinner="Calculando telemetría...")
 def secante(f,a,b,err):
-    cuadro = {
-    'a[i]':[],
-    'b[i]':[],
-    'x[i]':[],
-    'f(x[i])':[],
-    'Dx[i]':[]
-    }
+    
+    datos = Historial(['a[i]','b[i]','x[i]','f(x[i])','Dx[i]'])
+    
     fa = ut.evaluar_f(f,a)
     fb = ut.evaluar_f(f,b)
 
     # Casos base
     if fa * fb > 0:
-        return None, []
+        return None, datos.obtener_datos()
     if a  > b:
         a, b = b, a
         fa, fb = fb, fa
     
     # Calculo de la raíz
-    """for _ in range(1, max_i+1):
-        x = b - (fb * (b-a))/(fb - fa)
-        fx = ec.evaluar_f(f,x)"""
-    valor_anterior= a
-    while True :
+    x_anterior=a
+    iteracion=0
+    while iteracion < 100:
         
         x = b - (fb * (b - a)) / (fb - fa)
         fx = ut.evaluar_f(f, x)
 
-        if round(x,6) == round(valor_anterior,6):
+        datos.agregar({
+            'a[i]':a,
+            'b[i]':b,
+            'x[i]':x,
+            'f(x[i])':fx,
+            'Dx[i]':(x-a)
+        })
+        
+        # Frena si es que la diferencia entre las derivadas es cercana al cero
+        if abs(fb - fa) < 1e-12:
+            st.warning("División por cero en secante. Los puntos están muy cerca.")
+            return None, datos
+
+        # Frena cuando el resultado es demasiado cercano al cero
+        if abs(fx) < 1e-12: 
+            return x, datos
+            
+        # Cierra el ciclo cuando la diferencia entre cada iteración es minima
+        if abs(x - x_anterior) < err:
             break
         
-        cuadro['a[i]'].append(f'{a:.6f}')
-        cuadro['b[i]'].append(f'{b:.6f}')
-        cuadro['x[i]'].append(f'{x:.6f}')
-        cuadro['f(x[i])'].append(f'{fx:.6f}')
-        cuadro['Dx[i]'].append(f'{x-a:.6f}')
-
-        if abs(fx) < err: 
-            return x, cuadro
-        valor_anterior= x
         # Opciones
         if fx * fa < 0:
             b = x
@@ -50,8 +53,11 @@ def secante(f,a,b,err):
         else:
             a = x
             fa = fx
-
-    return x, cuadro
+        
+        x_anterior=x
+        iteracion+=1
+        
+    return x, datos
 
 def mostrar_info():
     st.markdown("<h1 style='text-align: center;'>Método Secante</h1>", unsafe_allow_html=True)
@@ -126,11 +132,11 @@ def mostrar_info():
                 else:
                     st.space('small')
                     st.success(f'Raíz encontrada en: $$x \\approx {round(raiz,6)}$$')
-                    grafico.dibujar(formula, raiz, inf, sup, key="graf_unico_sec", iteraciones=datos if mostrar_datos else None)
+                    grafico.dibujar(formula, raiz, inf, sup, key="graf_unico_sec", iteraciones=datos.obtener_datos() if mostrar_datos else None)
                     
                     # Expander para la tabla
                     with st.expander("Ver tabla de iteraciones"):
-                        st.table(pd.DataFrame(datos))       
+                        st.table(datos.obtener_dataframe())       
             else:
                 if 'raiz' in locals():
                     st.error('No se ha encontrado la raíz o no hay cambio de signo en el intervalo.')
@@ -139,20 +145,48 @@ def mostrar_info():
     st.divider()
     st.header('Código hecho en Python')
     st.code('''
-def secante(f,a,b,err,max_i):
+def secante(a,b,err):
     fa = f(a)
     fb = f(b)
+    
     # Casos base
-    if f(a) * f(b) > 0:
+    if fa * fb > 0:
         return None
-    if a  > b:
+    if a > b:
         a, b = b, a
-    # Calculo de la raíz
-    while True :
-        valor_anterior= b
-        x = b - (fb * (b - a)) / (fb - fa)
-        fx = ec.evaluar_f(f, x)
+        fa, fb = fb, fa
 
-        if round(x,6) == round(valor_anterior,6):
-            break''',
+    # Calculo de la raíz
+    x_anterior = a
+    iteracion = 0
+    
+    while iteracion < 100:
+    
+        x = b - (fb * (b - a)) / (fb - fa)
+        fx = f(x)
+        
+        # Frena si es que la diferencia entre las derivadas es cercana al cero
+        if abs(fb - fa) < 1e-12:
+            return None
+        
+        # Frena cuando el resultado es demasiado cercano al cero
+        if abs(fx) < 1e-12: 
+            return x
+            
+        # Cierra el ciclo cuando la diferencia entre cada iteración es minima
+        if abs(x - x_anterior) < err:
+            break
+            
+        # Opciones
+        if fx * fa < 0:
+            b = x
+            fb = fx
+        else:
+            a = x
+            fa = fx
+            
+        x_anterior = x
+        iteracion += 1
+        
+    return x''',
             "python")

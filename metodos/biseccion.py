@@ -1,45 +1,45 @@
 import streamlit as st
-import pandas as pd
 from core import grafico, comparativa, utils as ut
+from core.historial import Historial
 
 @st.cache_data(show_spinner="Calculando telemetría...")
 def biseccion(f,a,b,err):
-    cuadro = {
-    'a[i]':[],
-    'b[i]':[],
-    'x[i]':[],
-    'f(x[i])':[],
-    'Dx[i]':[]
-    }
+    
+    datos = Historial(['a[i]','b[i]','x[i]','f(x[i])','Dx[i]'])
+    
     fa = ut.evaluar_f(f,a)
     fb = ut.evaluar_f(f,b)
 
     # Casos base
     if fa * fb > 0:
-        return None, []
-    if a  > b:
+        return None, datos.obtener_datos()
+    if a > b:
         a, b = b, a
         fa, fb = fb, fa
     
     # Calculo de la raíz
-    x_anterior = a
-    i=0
-    while i < 100:
-        x = round((a+b)/2,6)
-        fx = ut.evaluar_f(f,x)
-
-        cuadro['a[i]'].append(f'{a:.6f}')
-        cuadro['b[i]'].append(f'{b:.6f}')
-        cuadro['x[i]'].append(f'{x:.6f}')
-        cuadro['f(x[i])'].append(f'{fx:.6f}')
-        cuadro['Dx[i]'].append(f'{x-a:.6f}')
-
-        if abs(fx) < err: 
-            return x, cuadro
-        if round(x,6) == round(x_anterior,6):
-            break
+    x_anterior=a
+    iteracion=0
+    while iteracion < 100:
         
-        x_anterior = x
+        x=(a+b)/2
+        fx=ut.evaluar_f(f,x)
+        
+        datos.agregar({
+            'a[i]':a,
+            'b[i]':b,
+            'x[i]':x,
+            'f(x[i])':fx,
+            'Dx[i]':(x-a)
+        })
+
+        # Frena cuando el resultado es demasiado cercano al cero
+        if abs(fx) < 1e-12: 
+            return x, datos
+            
+        # Cierra el ciclo cuando la diferencia entre cada iteración es minima
+        if abs(x - x_anterior) < err:
+            break
         
         # Opciones
         if fx * fa < 0:
@@ -48,9 +48,11 @@ def biseccion(f,a,b,err):
         else:
             a = x
             fa = fx
-        i+=1
+        
+        x_anterior=x
+        iteracion+=1
 
-    return x, cuadro
+    return x, datos
 
 def mostrar_info():
     st.markdown("<h1 style='text-align: center;'>Método Bisección</h1>", unsafe_allow_html=True)
@@ -124,13 +126,15 @@ def mostrar_info():
                 else:
                     st.space('small')
                     st.success(f'Raíz encontrada en: $x \\approx {round(raiz,6)}$')
-                    
                     # Gráfico
-                    grafico.dibujar(formula, raiz, inf, sup, key="graf_unico_bis", iteraciones=datos if mostrar_datos else None)
-                    
+                    grafico.dibujar(formula, raiz, inf, sup, key="graf_unico_bis", iteraciones=datos.obtener_datos() if mostrar_datos else None)
                     # Expander para la tabla
+                    
+                    # Progresión en cada iteración
+                    # st.slider('Progresión en cada iteración', step=1, max_value=len(datos.obtener_datos().get('x[i]',None)))
+                    
                     with st.expander("Ver tabla de iteraciones"):
-                        st.table(pd.DataFrame(datos))
+                        st.table(datos.obtener_dataframe())
             else:
                 if 'raiz' in locals():
                     st.error('No se ha encontrado la raíz o no hay cambio de signo en el intervalo.')
@@ -138,20 +142,34 @@ def mostrar_info():
     st.divider()
     st.header('Código hecho en Python')
     st.code('''
-def biseccion(f,a,b,err,max_i):
+def biseccion(a,b,err):
     fa = f(a)
     fb = f(b)
+    
     # Casos base
-    if f(a) * f(b) > 0:
+    if fa * fb > 0:
         return None
-    if a  > b:
+    if a > b:
         a, b = b, a
+        fa, fb = fb, fa
+
     # Calculo de la raíz
-    for i in range(1, max_i+1):
-        x = (a+b)/2
+    x_anterior = a
+    iteracion = 0
+    
+    while iteracion < 100:
+    
+        x = (a + b) / 2
         fx = f(x)
-        if abs(fx) < err or max_i<=0: 
-            return x
+        
+        # Frena cuando el resultado es demasiado cercano al cero
+        if abs(fx) < 1e-12: 
+            return x, datos
+            
+        # Cierra el ciclo cuando la diferencia entre cada iteración es minima
+        if abs(x - x_anterior) < err:
+            break
+            
         # Opciones
         if fx * fa < 0:
             b = x
@@ -159,5 +177,9 @@ def biseccion(f,a,b,err,max_i):
         else:
             a = x
             fa = fx
+            
+        x_anterior = x
+        iteracion += 1
+        
     return x''',
             "python")

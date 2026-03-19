@@ -34,6 +34,3 @@ def mostrar_formula(formula):
     f = f.replace('*', r' \cdot ')
 
     return f'f(x) = {f}'
-
-def titulo(seccion):
-    return f"<h1 style='text-align: center;'>{seccion}</h1>"
