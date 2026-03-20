@@ -129,17 +129,7 @@ def mostrar_info():
                     comparativa.comparar_generico("Bisección", "Secante", formula, err, mostrar_datos, inf=inf, sup=sup)
                 else:
                     st.space('small')
-                    st.markdown(f"""
-                    <div style='background-color:#1e1e1e;
-                                padding:15px;
-                                border-radius:10px;
-                                border:1px solid #444'>
-                    <h3 style='color:#58D68D; margin-bottom:5px;'>✔ Resultado</h3>
-                    <p style='font-size:22px; color:white; margin:0;'>
-                    x ≈ {round(raiz,6)}
-                    </p>
-                    </div>
-                    """, unsafe_allow_html=True)
+                    st.success(f'Raíz encontrada en: $x \\approx {round(raiz,6)}$')
                     # Gráfico
                     grafico.dibujar(formula, raiz, inf, sup, key="graf_unico_bis", iteraciones=datos.obtener_datos() if mostrar_datos else None)
                     # Expander para la tabla
