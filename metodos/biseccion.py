@@ -58,8 +58,11 @@ def biseccion(f,a,b,err):
 
 def mostrar_info():
     st.markdown("""
-    <h1 style='text-align: center; color:#2E86C1; font-weight:600;'>
-    Método de Bisección
+    <h1 style='text-align: center;
+    background: linear-gradient(90deg, #36d1dc, #5b86e5);
+    -webkit-background-clip: text;
+    color: transparent;'>
+    🔍 Método de Bisección
     </h1>
     """, unsafe_allow_html=True)
     
@@ -84,19 +87,26 @@ def mostrar_info():
         col_in, col_out = st.columns([1, 2], gap="large")
 
         with col_in:
-            
-            formula = st.text_input('Escribe tu función $f(x)$:', value='x**2 + 11*x - 6')
-            st.caption("Usa `( )` para agrupar elementos. Por ejemplo `e^(1-x)` para $e^{1-x}$.")
+            st.subheader("📥 Ingreso de datos")
+
+            formula = st.text_input('Función f(x):', value='x**2 + 11*x - 6')
             st.latex(ut.mostrar_formula(formula))
 
-            c1, c2 = st.columns(2)
-            with c1:
-                inf = st.number_input('Ingresar intervalo inferior',value=-10.0,step=2.0)
-            with c2:
-                sup = st.number_input('Ingresar intervalo superior',value=10.0,step=2.0)
+            st.divider()
+
+            col1, col2 = st.columns(2)
+
+            with col1:
+                inf = st.number_input('Valor inicial a', value=-10.0)
+
+            with col2:
+                sup = st.number_input('Valor final b', value=10.0)
+
+            st.divider()
+
+            err_exp = st.slider('Precisión (n en 10⁻ⁿ)', 1, 10, 2)
+            err = 10**(-err_exp)
             
-            err = st.number_input('Tolerancia de error: $ε = 10^{-n}$',value=2,min_value=1, max_value=10)
-            err = 10**(-err)
             
             # Realizamos el cálculo aquí para saber si habilitar las opciones
             try:
