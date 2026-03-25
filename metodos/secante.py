@@ -1,65 +1,5 @@
 import streamlit as st
-from core import grafico, comparativa, utils as ut
-from core.historial import Historial
-
-@st.cache_data(show_spinner="Calculando telemetría...")
-def secante(f,a,b,err):
-    
-    datos = Historial(['a[i]','b[i]','x[i]','f(x[i])','Dx[i]','Error Absoluto'])
-    
-    fa = ut.evaluar_f(f,a)
-    fb = ut.evaluar_f(f,b)
-
-    # Casos base
-    if fa * fb >= 0:
-        return None, datos.obtener_datos()
-    if a  > b:
-        a, b = b, a
-        fa, fb = fb, fa
-    
-    # Calculo de la raíz
-    x_anterior=a
-    iteracion=0
-    while iteracion < 100:
-        
-        # Frena si es que la diferencia entre las derivadas es cercana al cero
-        if abs(fb - fa) < 1e-12:
-            st.warning("División por cero en secante. Los puntos están muy cerca.")
-            return None, datos
-        
-        x = b - (fb * (b - a)) / (fb - fa)
-        fx = ut.evaluar_f(f, x)
-        err_abs = abs(b - a)
-
-        datos.agregar({
-            'a[i]':a,
-            'b[i]':b,
-            'x[i]':x,
-            'f(x[i])':fx,
-            'Dx[i]':(x-a),
-            'Error Absoluto':err_abs
-        })
-        
-        # Frena cuando el resultado es demasiado cercano al cero
-        if abs(fx) < 1e-12: 
-            return x, datos
-            
-        # Cierra el ciclo cuando la diferencia entre cada iteración es minima
-        if abs(x - x_anterior) < err:
-            break
-        
-        # Opciones
-        if fx * fa < 0:
-            b = x
-            fb = fx
-        else:
-            a = x
-            fa = fx
-        
-        x_anterior=x
-        iteracion+=1
-        
-    return x, datos
+from core import algoritmos, grafico, utils as ut
 
 def mostrar_info():
     st.markdown("<h1 style='text-align: center;'>Método Secante</h1>", unsafe_allow_html=True)
@@ -84,37 +24,40 @@ def mostrar_info():
         # Dividimos la pantalla: 1 parte para inputs, 2 partes para gráficos
         col_in, col_out = st.columns([1, 2], gap="large")
         with col_in:
+            st.subheader("📥 Ingreso de datos")
             formula = st.text_input('Escribe tu función $f(x)$:', value='x**2 + 11*x - 6')
             st.caption("Usa `( )` para agrupar elementos. Por ejemplo `e^(1-x)` para $$ e^{1-x}$$.")
             st.latex(ut.mostrar_formula(formula))
+            st.divider()
         
             c1, c2 = st.columns(2)
             with c1:
                 inf = st.number_input('Ingresar intervalo inferior',value=-10.0,step=2.0)
             with c2:
                 sup = st.number_input('Ingresar intervalo superior',value=10.0,step=2.0)
+            err_exp = st.slider('Precisión ($n$ en $10^{-n}$)', 1, 10, 2)
+            err = 10**(-err_exp)
+            st.divider()
             
-            err = st.number_input('Tolerancia de error: $ε = 10^{-n}$',value=2,min_value=1, max_value=10)
-            err = 10**(-err)
-
-            # Realizamos el cálculo aquí para saber si habilitar las opciones    
             try:
                 # Asumo que tu función se llama secante() adentro de secante.py
-                raiz, datos = secante(formula, inf, sup, err) 
+                raiz, datos = algoritmos.secante(formula, inf, sup, err) 
                 if raiz is not None:
+                    
                     mostrar_datos = st.toggle("Mostrar iteraciones en el gráfico")
 
-                    # seleccion = st.pills(
-                    #     label="Comparar con:", 
-                    #     options=["Bisección", "Newton"], 
-                    #     key="pills_sec", 
-                    #     selection_mode='single'
-                    # )
-
-                    # if seleccion == "Newton":
-                    #     st.info("Para comparar con Newton, necesitamos un valor inicial $x_n$:")
-                    #     x_n_comp = st.number_input('Ingresar valor inicial $x_n$', value=sup, step=1.0)
-
+                    grafico_f = grafico.obtener_grafico(formula, raiz, inf, sup, key="graf_sec", iteraciones=datos.obtener_datos() if mostrar_datos else None
+                    )
+                    
+                    ut.boton_descarga(
+                        metodo='Secante',
+                        formula=formula,
+                        parametros=f"Intervalo [{inf}, {sup}], Tolerancia: 10^-{err_exp}",
+                        raiz=raiz,
+                        datos=datos.obtener_datos(),
+                        fig=grafico_f
+                        )
+                    
             except Exception as e:
                 raiz = None
                 st.error(f'Error en la fórmula: {e}')
@@ -124,30 +67,7 @@ def mostrar_info():
         with col_out:
             # Verifica si existe la raíz antes de mostrar opciones adicionales
             if 'raiz' in locals() and raiz is not None:
-
-                # if seleccion == "Newton":
-                #     comparativa.comparar_generico("Secante", "Newton", formula, err, mostrar_datos, inf=inf, sup=sup, x_n=x_n_comp)
-                    
-                # elif seleccion == "Bisección":
-                #     comparativa.comparar_generico("Secante", "Bisección", formula, err, mostrar_datos, inf=inf, sup=sup)
-                    
-                # else:
-                #     st.space('small')
-                #     st.success(f'Raíz encontrada en: $$x \\approx {round(raiz,6)}$$')
-                #     grafico.dibujar(formula, raiz, inf, sup, key="graf_unico_sec", iteraciones=datos.obtener_datos() if mostrar_datos else None)
-                    
-                #     # Expander para la tabla
-                #     with st.expander("Ver tabla de iteraciones"):
-                #         st.table(datos.obtener_dataframe())       
-                
-                st.space('small')
-                st.success(f'Raíz encontrada en: $$x \\approx {raiz:.6f}$$')
-                grafico.dibujar(formula, raiz, inf, sup, key="graf_unico_sec", iteraciones=datos.obtener_datos() if mostrar_datos else None)
-                
-                # Expander para la tabla
-                with st.expander("Ver tabla de iteraciones"):
-                    st.table(datos.obtener_dataframe())  
-                
+                ut.mostrar_panel_resultados(raiz=raiz,datos=datos.obtener_datos(),grafico_f=grafico_f)
                 
             else:
                 if 'raiz' in locals():

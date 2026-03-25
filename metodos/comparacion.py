@@ -1,6 +1,5 @@
 import streamlit as st
-from core import utils as ut, grafico
-from metodos import biseccion, secante, newton, punto_fijo
+from core import algoritmos, grafico, utils as ut
 import time
 
 def renderizar_metodo(nombre_metodo, id_columna, formula, err):
@@ -20,7 +19,7 @@ def renderizar_metodo(nombre_metodo, id_columna, formula, err):
             with c_a: a = st.number_input('Límite inf $(a)$', value=0.0, key=f"a_{id_columna}")
             with c_b: b = st.number_input('Límite sup $(b)$', value=2.0, key=f"b_{id_columna}")
             
-            raiz, datos = biseccion.biseccion(formula, a, b, err)
+            raiz, datos = algoritmos.biseccion(formula, a, b, err)
             a_graf, b_graf = a, b
                 
         elif nombre_metodo == "Secante":
@@ -28,13 +27,13 @@ def renderizar_metodo(nombre_metodo, id_columna, formula, err):
             with c_x0: x0 = st.number_input('Punto $x_0$', value=0.0, key=f"x0_{id_columna}")
             with c_x1: x1 = st.number_input('Punto $x_1$', value=1.0, key=f"x1_{id_columna}")
 
-            raiz, datos = secante.secante(formula, x0, x1, err)
+            raiz, datos = algoritmos.secante(formula, x0, x1, err)
             a_graf, b_graf = x0, x1
                 
         elif nombre_metodo == "Newton":
             x0 = st.number_input('Punto inicial $x_0$', value=0.0, key=f"n_x0_{id_columna}")
 
-            raiz, datos = newton.newton(x0, formula, err)
+            raiz, datos = algoritmos.newton(x0, formula, err)
             if raiz is not None:
                 a_graf, b_graf = raiz - 5, raiz + 5 
                 
@@ -43,7 +42,7 @@ def renderizar_metodo(nombre_metodo, id_columna, formula, err):
             with c1: g_form = st.text_input('Función despejada $g(x)$:', value='(6 - x**2)/11', key=f"g_{id_columna}")
             with c2: x0 = st.number_input('Punto inicial $x_0$', value=0.0, key=f"pf_x0_{id_columna}")
 
-            raiz, datos, converge = punto_fijo.punto_fijo(g_form, x0, err)
+            raiz, datos, converge = algoritmos.punto_fijo(g_form, x0, err)
             if not converge: 
                 raiz = None # Si diverge, lo forzamos a None para que tire error abajo
             elif raiz is not None:
@@ -56,14 +55,8 @@ def renderizar_metodo(nombre_metodo, id_columna, formula, err):
         # Renderizamos el resultado y el gráfico de f(x) de este método
         if raiz is not None:
             st.success(f'Raíz encontrada en: $x \\approx {round(raiz,6)}$')
-            grafico.dibujar(
-                f=formula,
-                raiz=raiz,
-                inf=a_graf,
-                sup=b_graf,
-                key=f"graf_{id_columna}",
-                iteraciones=datos.obtener_datos()
-                )
+            grafico_func = grafico.obtener_grafico(formula, raiz, a_graf, b_graf, key=f"graf_{id_columna}", iteraciones=datos.obtener_datos())
+            grafico.dibujar(grafico_func)
         else:
             st.error('😥 No se ha encontrado la raíz o el método diverge.')
 
@@ -83,8 +76,8 @@ def mostrar_info():
     st.caption("Usa `( )` para agrupar elementos. Por ejemplo `e^(1-x)` para $e^{1-x}$.")
     st.latex(ut.mostrar_formula(formula))
     
-    err_val = st.number_input('Tolerancia compartida: $ε = 10^{-n}$', value=4, min_value=1, max_value=12)
-    err = 10**(-err_val)
+    err_exp = st.slider('Precisión ($n$ en $10^{-n}$)', 1, 10, 2)
+    err = 10**(-err_exp)
 
     # Selectores "VS"
     col1, col2, col3 = st.columns([2, 1, 2], gap="small")
@@ -114,10 +107,10 @@ def mostrar_info():
                 col_t1, col_t2 = st.columns(2)
                 with col_t1:
                     st.markdown(f"**{nom_1}**")
-                    st.dataframe(datos_1.obtener_dataframe(), use_container_width=True)
+                    st.table(datos_1.obtener_dataframe())
                 with col_t2:
                     st.markdown(f"**{nom_2}**")
-                    st.dataframe(datos_2.obtener_dataframe(), use_container_width=True)
+                    st.table(datos_2.obtener_dataframe())
             st.divider()
             st.subheader("🏆 Resultados de la Comparación")
             

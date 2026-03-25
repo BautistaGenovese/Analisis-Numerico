@@ -1,31 +1,6 @@
-import streamlit as st
-import pandas as pd
-import statistics
-from core import grafico
+import streamlit as st, pandas as pd
+from core import algoritmos, grafico, utils as ut
 
-def agregar_dato():
-    # Usamos los valores actuales de los inputs
-    st.session_state.datos['x'].append(st.session_state.input_x)
-    st.session_state.datos['y'].append(st.session_state.input_y)
-    # Limpiamos los inputs reseteando su estado
-    st.session_state.input_x = 0.0
-    st.session_state.input_y = 0.0
-
-def calcular_regresion():
-    try:
-        m, int = statistics.linear_regression(
-            st.session_state.datos['x'],
-            st.session_state.datos['y']
-        )
-        if m != 0:
-            raiz = int / m * (-1)
-            return m, int, raiz
-    except Exception as e:
-        st.warning('⚠️ No fue posible calcular la recta con estos valores.')
-        
-    st.error('La recta no tiene raices.')
-    return None, None, None
-    
 def mostrar_info():
     st.markdown("<h1 style='text-align: center;'>Regresión Lineal</h1>", unsafe_allow_html=True)
     
@@ -48,67 +23,82 @@ def mostrar_info():
         """)
     
     with st.container(border=True):
-        
-        # Dividimos la pantalla: 1 parte para inputs, 2 partes para gráficos
-        col_in, col_out = st.columns([1, 2], gap="large")
+            col_in, col_out = st.columns([1, 2], gap="large")
 
-        with col_in:
-            # Inicializamos el contenedor de datos si no existe
-            if 'datos' not in st.session_state:
-                st.session_state.datos = {'x': [], 'y': []}
-
-            col1, col2 = st.columns(2)
-            with col1:
-                # La key maneja automáticamente el valor en session_state
-                st.number_input('Ingresar $x$:', key='input_x', format="%.4f", step=1.0)
-            with col2:
-                st.number_input('Ingresar $y$:', key='input_y', format="%.4f", step=1.0)
-
-            c1, c2, c3 = st.columns(3)
-            with c1:
-                st.button('Agregar Dato', on_click=agregar_dato, width='stretch')
-            with c2:
-                if st.button('Borrar último', width='stretch'):
-                    if st.session_state.datos['x']:
-                        st.session_state.datos['x'].pop()
-                        st.session_state.datos['y'].pop()
-            with c3:
-                if st.button('Borrar datos', width='stretch'):
-                    if st.session_state.datos['x']:
-                        st.session_state.datos = {'x': [], 'y': []}
-
-            if len(st.session_state.datos['x']) > 1:
-                m, int, raiz = calcular_regresion()
-                if raiz != None:
-                    st.latex(f'f(x) = {m:.4f}x {'+' if int>=0 else '-'} {abs(int):.4f}')
-                    st.space('xsmall')
-
-            st.dataframe(
-                pd.DataFrame(st.session_state.datos),
-                width='stretch',
-                hide_index=True,
-                key='puntos'
-            )
-
-        with col_out:
-            st.space('small')
-            if len(st.session_state.datos['x']) > 1 and raiz is not None:
-                grafico.dibujar(
-                    f=f'{m}x + {int}',
-                    raiz=raiz,
-                    inf=min(raiz,0),
-                    sup=max(raiz,0),
-                    key='regresion',
-                    iteraciones=st.session_state.datos
-                )
-                with st.expander("Mostrar datos de la regresión"):
-                    st.write(f'Raiz encontrada en $$x ≈ {raiz:.4f}$$')
-                    st.write(f'Pendiente $$m ≈ {m:.4f}$$')
-                    st.write(f'Intersección con el eje: $$y ≈ {int:.4f}$$')
-                    st.write(f'Coeficiente de determinación $$R^2 ≈ {statistics.correlation(st.session_state.datos["x"], st.session_state.datos["y"])**2:.4f}$$')
-            else:
-                st.info('Agrega más puntos para mostrar la regresión y sus datos asociados.')
+            with col_in:
+                st.subheader("📥 Ingreso de datos")
+                st.info("💡 Edita la tabla directamente. Toca la fila vacía al final para agregar más puntos.")
                 
+                # 1. Creamos una tablita por defecto
+                df_base = pd.DataFrame({
+                    "x": [1.0, 2.0, 3.0], 
+                    "y": [2.1, 4.0, 6.2]
+                })
+                
+                # 2. LA MAGIA: Editor de datos interactivo (Reemplaza al session_state)
+                df_usuario = st.data_editor(
+                    df_base, 
+                    num_rows="dynamic", # Permite agregar o borrar filas
+                    use_container_width=True,
+                    key="editor_regresion"
+                )
+                
+                # 3. Extraemos los datos crudos de la tablita a listas normales de Python
+                x_vals = df_usuario["x"].dropna().tolist()
+                y_vals = df_usuario["y"].dropna().tolist()
+
+
+                # Realizamos el cálculo
+                m, b, raiz, r2 = algoritmos.calcular_regresion(x_vals, y_vals)
+                
+                if m is not None:
+                    st.subheader('📈 Función')
+                    
+                    inf_grafico = min(raiz, min(x_vals)) - 1
+                    sup_grafico = max(raiz, max(x_vals)) + 1
+                    formula_str = f"{m}*x + {b}"
+                    datos_dict = {'x': x_vals, 'y': y_vals}
+                    
+                    with st.spinner('Generando gráfica...'):
+                        fig = grafico.obtener_grafico(
+                                f=formula_str, 
+                                raiz=raiz, 
+                                inf=inf_grafico, 
+                                sup=sup_grafico, 
+                                key='regresion', 
+                                iteraciones=datos_dict
+                                ) 
+                    st.latex(f'f(x) = {m:.4f}x {"+" if b>=0 else "-"} {abs(b):.4f}')
+                    st.divider()
+                    
+                    ut.boton_descarga(
+                        metodo='Regresión',
+                        formula=f'{m:.4f}x {"+" if b>=0 else "-"} {abs(b):.4f}',
+                        parametros=f"Pendiente (m): {m:.4f}, Ordenada (b): {b:.4f}, (R²): {r2:.4f}",
+                        raiz=raiz,
+                        datos=datos_dict,
+                        fig=fig
+                        )
+                    
+
+            with col_out:
+                st.space('small')
+                # Mostramos resultados si hay datos válidos
+                if m is not None and raiz is not None:
+                    st.success(f'Raíz (Intersección con X) encontrada en: $x \\approx {raiz:.6f}$')
+                    
+                    # Dibujamos
+                    grafico.dibujar(fig)
+                    
+                    # Panel de métricas en lugar de tabla de iteraciones
+                    with st.expander("📊 Ver métricas del modelo"):
+                        st.write(f"- **Pendiente ($m$):** `{m:.4f}`")
+                        st.write(f"- **Ordenada al origen ($b$):** `{b:.4f}`")
+                        st.write(f"- **Coeficiente de determinación ($R^2$):** `{r2:.4f}` (Mide qué tan bien se ajusta la recta)")
+                        
+                else:
+                    st.warning('Agrega al menos 2 puntos válidos con una pendiente distinta de cero para calcular la regresión.')
+                    
     st.divider()
     st.header('Código hecho en Python')
     st.code('''

@@ -3,7 +3,7 @@ import inicio
 from metodos import biseccion, secante, newton, punto_fijo, regresion, comparacion
 
 st.set_page_config(
-    page_title='App Análisis Numerico',
+    page_title='Rooty',
     page_icon='📊',
     layout='wide'
 )
@@ -19,21 +19,7 @@ estilo = """
         padding-top: 2rem !important; 
         padding-bottom: 6rem !important; 
     }
-
-    /* ========================================================
-       BOTONES PEGADOS A LA DERECHA (FLEX-END)
-       ======================================================== */
-    div[data-testid="stPills"] {
-        display: flex !important;
-        justify-content: flex-end !important; /* Empuja el contenedor a la derecha */
-        width: 100% !important;
-    }
     
-    div[data-testid="stPills"] > div {
-        display: flex !important;
-        justify-content: flex-end !important; /* Empuja los botones a la derecha */
-    }
-
     /* FOOTER CON EFECTO CRISTAL */
     .mi-footer {
         position: fixed;
@@ -68,7 +54,11 @@ def main():
         col_logo, col_nav = st.columns([1, 2], vertical_alignment="center") 
         
         with col_logo:
-            st.markdown("<h3 style='margin: 0;'>📊 Análisis Numérico</h3>", unsafe_allow_html=True)
+            st.markdown("""
+                <div style="display: flex; margin-top:-10px;align-items: center; height: 100%; min-height: 45px; padding-left: 10px;">
+                    <h3 style="margin: 0; padding: 0; line-height: 1;">📊 Rooty</h3>
+                </div>
+            """, unsafe_allow_html=True)
             
         with col_nav:
             choice = st.pills(

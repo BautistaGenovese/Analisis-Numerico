@@ -1,42 +1,6 @@
 import streamlit as st
-import sympy as sp
-from core import grafico, utils as ut
-from core.historial import Historial
+from core import algoritmos, grafico, utils as ut
 
-@st.cache_data(show_spinner=True)
-def punto_fijo (g,x0, err):
-   
-    datos = Historial(['x[i]','g(x[i])','Error Absoluto'])
-    
-    x_actual=x0
-    iteracion=0
-    while iteracion < 100:
-        try:
-            x_nuevo = ut.evaluar_f(g, x_actual)
-            err_abs = abs(x_nuevo - x_actual)
-            
-            datos.agregar({
-            'x[i]':x_actual,
-            'g(x[i])':x_nuevo,
-            'Error Absoluto':err_abs
-            })
-            
-            # Sale si el error absoluto es demasiado grande
-            if err_abs > 1e6:
-                return x_nuevo, datos, False
-            
-            # |x_(i+1) - x_i| <= ε
-            if err_abs <= err:
-                
-                return x_nuevo, datos, True
-            
-            x_actual = x_nuevo
-            
-        except Exception:
-            return None, datos, False
-        
-        iteracion+=1        
-    return x_actual, datos, False
 
 def mostrar_info():
     st.markdown("<h1 style='text-align: center;'>Método de Punto Fijo</h1>", unsafe_allow_html=True)
@@ -62,6 +26,7 @@ def mostrar_info():
         col_in, col_out = st.columns([1, 2], gap="large")
 
         with col_in:
+            st.subheader("📥 Ingreso de datos")
             
             modo = st.radio(
                 "¿Cómo deseas ingresar la función?",
@@ -71,7 +36,6 @@ def mostrar_info():
             
             if modo == "Ingresar g(x) despejada (Recomendado)":
                 formula_g = st.text_input('Escribe tu función despejada $g(x)$:', value='(x + 2)**(0.5)')
-                st.caption("Ejemplo: Si tu $f(x) = x^2 - x - 2 = 0$, usa `(x + 2)**0.5`.")
                 st.latex('g(x)' + ut.mostrar_formula(formula_g)[4:])
             else:
                 
@@ -82,42 +46,51 @@ def mostrar_info():
                 # Generamos automáticamente el string de la nueva función g(x)
                 formula_g = f"x - ({formula_f})"
                 st.latex(f"g(x) = x - ({ut.mostrar_formula(formula_f)[7:]})") # Mostramos cómo quedó
-        
-            c1, c2 = st.columns(2)
-            with c1:
-                x_inicial = st.number_input('Ingresar punto de inicio $$(x_0)$$', value=1.0, step=0.5)
-            with c2:
-                err_input = st.number_input('Tolerancia de error: $ε = 10^{-n}$', value=2, min_value=1, max_value=10)
-                err = 10**(-err_input)
+
+            st.divider()
+            
+            x_inicial = st.number_input('Ingresar punto de inicio $$(x_0)$$', value=1.0, step=0.5)
+
+            err_exp = st.slider('Precisión ($n$ en $10^{-n}$)', 1, 10, 2)
+            err = 10**(-err_exp)
+            
+            st.divider()
             
             try:
-                raiz, datos, converge = punto_fijo(formula_g, x_inicial, err)
+                raiz, datos, converge = algoritmos.punto_fijo(formula_g, x_inicial, err)
                 
                 if raiz is not None:
+                    
+                    inf_grafico = raiz - 5
+                    sup_grafico = raiz + 5
+                    
                     mostrar_datos = st.toggle("Mostrar iteraciones en el gráfico")
-                    if not converge:
-                        st.error('El método DIVERGIÓ o no alcanzó la tolerancia requerida.')
-                        st.warning(f'Último valor calculado: $x \\approx {raiz:.6f}$')
-
+                
+                grafico_func = grafico.obtener_grafico(
+                    f=formula_g, 
+                    raiz=raiz, 
+                    inf=inf_grafico,
+                    sup=sup_grafico,
+                    key='graf Punto Fijo', 
+                    iteraciones=datos.obtener_datos() if mostrar_datos else None
+                )
+                
+                ut.boton_descarga(
+                        metodo='Bisección',
+                        formula=formula_g,
+                        parametros=f"Tolerancia: 10^-{err_exp}",
+                        raiz=raiz,
+                        datos=datos.obtener_datos(),
+                        fig=grafico_func
+                        )
+                        
             except Exception as e:
                 st.error(f'Error al procesar la fórmula: {e}')
 
         with col_out:
             st.space('small')
-            if 'raiz' in locals() and raiz is not None and converge:
-                st.success(f'El método CONVERGIÓ. Raíz aproximada: $$x \\approx {raiz:.6f}$$')
-                # Dibujamos el gráfico
-                grafico.dibujar(
-                    f=formula_g, 
-                    raiz=raiz, 
-                    inf=raiz-5,
-                    sup=raiz+5,
-                    key='graf Punto Fijo', 
-                    iteraciones=datos.obtener_datos() if mostrar_datos else None
-                )
-                # Expander para la tabla
-                with st.expander("Ver tabla de iteraciones"):
-                    st.table(datos.obtener_dataframe())
+            if 'raiz' in locals() and raiz is not None:
+                ut.mostrar_panel_resultados(raiz,datos.obtener_datos(),grafico_func,converge)
             else:
                 st.error('Ocurrió un error matemático durante el cálculo (probablemente la función divergió hacia el infinito o hay raíces complejas).')
                     

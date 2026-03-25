@@ -51,16 +51,18 @@ Analisis-Numerico/
 ├── 📄 app.py              # Punto de entrada principal (Configuración de Streamlit)
 ├── 📄 inicio.py           # Pantalla de bienvenida e información del equipo
 │
-├── 📂 metodos/            # Lógica de los algoritmos numéricos
-│   ├── 📄 biseccion.py    # Implementación del método de Bisección
-│   ├── 📄 secante.py      # Implementación del método de la Secante
-│   ├── 📄 newton.py       # Implementación del método de Newton-Raphson
-│   ├── 📄 punto_fijo.py   # Implementación del método de Punto Fijo
-│   └── 📄 regresion.py    # Cálculo de Regresión Lineal simple
+├── 📂 metodos/            # Interfaz de los algoritmos numéricos
+│   ├── 📄 biseccion.py    # UI para el método de Bisección
+│   ├── 📄 secante.py      # UI para el método de la Secante
+│   ├── 📄 newton.py       # UI para el método de Newton-Raphson
+│   ├── 📄 punto_fijo.py   # UI para el método de Punto Fijo
+│   ├── 📄 regresion.py    # UI para el cálculo de Regresión Lineal simple
+│   └── 📄 comparacion.py  # Lógica para contrastar dos métodos en paralelo
 │
 ├── 📂 core/               # Herramientas de soporte y visualización
-│   ├── 📄 comparativa.py  # Lógica para contrastar dos métodos en paralelo
+│   ├── 📄 algoritmos.py   # Lógica matemática pura (Bisección, Newton, etc.)
 │   ├── 📄 grafico.py      # Generación de trazados interactivos con Plotly
+│   ├── 📄 historial.py    # Clase para la gestión de iteraciones y datos
 │   └── 📄 utils.py        # Evaluación de funciones y formateo LaTeX
 │
 ├── 📂 archivos/           # Documentación PDF y consignas del TP
@@ -75,3 +77,4 @@ Analisis-Numerico/
 - Plotly
 - Pandas
 - SymPy
+- fpdf2 y Kaleido

@@ -11,7 +11,7 @@ def generar_base_fig(f, raiz, inf, sup,key=None):
     radio_con_margen = radio_vista * 1.1
 
     # Generamos los puntos basados en ese radio para que la curva no se corte
-    x = np.linspace(raiz - radio_con_margen, raiz + radio_con_margen, 1000)
+    x = np.linspace(raiz - radio_con_margen, raiz + radio_con_margen, 3000)
     y = ut.evaluar_f(f, x)
     
     fig = go.Figure()
@@ -30,7 +30,7 @@ def generar_base_fig(f, raiz, inf, sup,key=None):
             name='y = x',
             line=dict(color='#FFCA28', width=2, dash='dash')
         ))
-    elif key != 'regresion':
+    elif key == 'graf_bis' or key == 'graf_sec':
         # Línea punteada para el límite inferior 'a'
         fig.add_vline(
             x=inf, 
@@ -179,7 +179,7 @@ def generar_puntos(fig, datos, raiz):
     
     return fig_final
 
-def dibujar(f, raiz, inf, sup, key=None, iteraciones=None):
+def obtener_grafico(f, raiz, inf, sup, key=None, iteraciones=None):
     # Traemos la base del caché (instantáneo si no cambió f o el intervalo)
     fig = generar_base_fig(f, raiz, inf, sup,key)
     
@@ -191,12 +191,13 @@ def dibujar(f, raiz, inf, sup, key=None, iteraciones=None):
         fig_final = generar_puntos_reg(fig_final,iteraciones,raiz)
     else:
         fig_final = generar_puntos(fig_final,iteraciones,raiz)
-        
+    return fig_final
+
+def dibujar(fig_final):  
     # Finalmente, mostramos el gráfico unificado
     st.plotly_chart(
         fig_final,
         width='stretch',
-        key=key,
         config={
             'scrollZoom': False,
             'doubleClick': False, # <--- ESTO DESACTIVA EL RESET AL TOCAR
