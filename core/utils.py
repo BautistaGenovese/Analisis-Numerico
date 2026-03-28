@@ -1,3 +1,4 @@
+import math
 import numpy as np
 import re, io
 from fpdf import FPDF
@@ -8,35 +9,46 @@ def evaluar_f(formula, x=0):
     formula_python = formula.replace('^', '**').replace(',', '.')
     formula_python = re.sub(r'(\d)x', r'\1*x', formula_python)
 
-    # Definimos el diccionario de variables y funciones permitidas
+    # 1. TRUNCAMIENTO DE LA ENTRADA (Si está activado)
+    if st.session_state.get('simular_truncamiento', False):
+        decs = st.session_state.get('decimales_trunc', 4)
+        x = round(float(x), decs)
+
+    # 2. MODO TRIGONOMETRÍA (Radianes o Grados)
+    if st.session_state.get('trig_mode', 'Radianes') == 'Grados':
+        # Si está en grados, convertimos el valor a radianes antes de pasárselo a Numpy
+        sin_func = lambda val: np.sin(np.radians(val))
+        cos_func = lambda val: np.cos(np.radians(val))
+        tan_func = lambda val: np.tan(np.radians(val))
+    else:
+        sin_func = np.sin
+        cos_func = np.cos
+        tan_func = np.tan
+
     entorno_seguro = {
-        'x': x,
-        'np': np,
-        'sin': np.sin,
-        'sen': np.sin,
-        'cos': np.cos,
-        'exp': np.exp,
-        'log': np.log,
-        'e': np.e,
-        'pi': np.pi
+        'x': x, 'np': np,
+        'sin': sin_func, 'sen': sin_func, 'cos': cos_func, 'tan': tan_func,
+        'exp': np.exp, 'log': np.log, 'e': np.e, 'pi': np.pi, 'π': np.pi
     }
 
-    # Intentamos evaluar la fórmula
     try:
-        return eval(formula_python, entorno_seguro)
+        resultado = eval(formula_python, entorno_seguro)
+        
+        # 3. TRUNCAMIENTO DE LA SALIDA (Si está activado)
+        if st.session_state.get('simular_truncamiento', False):
+            resultado = round(float(resultado), decs)
+            
+        return resultado
         
     except SyntaxError:
-        raise ValueError("Error de sintaxis. Verifica que la fórmula esté completa y bien escrita (ej: te falta un número o cerraste mal un paréntesis).")
-        
+        raise ValueError("Error de sintaxis. Verifica que la fórmula esté completa.")
     except NameError as e:
-        variable_falsa = str(e).split("'")[1] if "'" in str(e) else str(e)
-        raise ValueError(f"No reconozco el término '{variable_falsa}'. Asegurate de usar solo la variable 'x' y funciones válidas (sin, cos, exp, etc.).")
-        
+        var = str(e).split("'")[1] if "'" in str(e) else str(e)
+        raise ValueError(f"Término no reconocido: '{var}'. Usa solo la 'x'.")
     except ZeroDivisionError:
-        raise ValueError("División por cero detectada en este punto. La función diverge o no está definida aquí.")
-        
+        raise ValueError("División por cero detectada.")
     except Exception as e:
-        raise ValueError(f"Error matemático al calcular: {e}")
+        raise ValueError(f"Error matemático: {e}")
 
 def mostrar_formula(formula):
     f = formula.replace('**','^').replace('sen','sin').replace('.', ',')
@@ -54,6 +66,97 @@ def mostrar_formula(formula):
     f = f.replace('*', r' \cdot ')
 
     return f'f(x) = {f}'
+
+def calcular_error(actual, anterior):
+    """Calcula el error según la preferencia del usuario en st.session_state"""
+    tipo = st.session_state.get('tipo_error', 'Absoluto')
+    
+    # Prevenir división por cero en errores relativos
+    if actual == 0 and tipo != "Absoluto":
+        return abs(actual - anterior) 
+        
+    if tipo == "Absoluto":
+        return abs(actual - anterior)
+    elif tipo == "Relativo":
+        return abs((actual - anterior) / actual)
+    elif tipo == "Porcentual":
+        return abs((actual - anterior) / actual) * 100
+    
+    return abs(actual - anterior) # Fallback por las dudas
+
+def restablecer_ajustes():
+    st.session_state.trig_mode = 'Radianes'
+    st.session_state.tipo_error = 'Absoluto'
+    st.session_state.max_iters = 100
+    st.session_state.cero_maquina = 1e-12
+    st.session_state.limite_infinito = 1e6
+    st.session_state.simular_truncamiento = False
+    st.session_state.mostrar_pdf = False
+    if 'decimales_trunc' in st.session_state:
+        st.session_state.decimales_trunc = 4
+
+def mostrar_menu_ajustes():
+    """Renderiza el menú flotante de configuraciones globales"""
+    
+    # Inicializamos valores por defecto la primera vez que se abre la app
+    defaults = {
+        'trig_mode': 'Radianes', 'tipo_error': 'Absoluto', 
+        'max_iters': 100, 'cero_maquina': 1e-12, 'limite_infinito': 1e6, 
+        'simular_truncamiento': False, 'mostrar_pdf': False
+    }
+    for llave, valor in defaults.items():
+        if llave not in st.session_state:
+            st.session_state[llave] = valor
+
+    with st.popover("⚙️", width='stretch'):
+        st.markdown("### 🛠️ Configuración Global")
+
+        st.divider()
+        st.write("**🧮 Motor Matemático**")
+        
+        # 3. MAGIA DE STREAMLIT: Usamos 'key' en vez del signo '='
+        st.radio("Trigonometría", ["Radianes", "Grados"], horizontal=True, key="trig_mode",help="Define cómo se evalúan las funciones como sin(x) o cos(x). En el ámbito académico y en la programación, el estándar matemático es usar Radianes.")
+        st.selectbox("Criterio de Parada (Error)", ["Absoluto", "Relativo", "Porcentual"], key="tipo_error",help="Define la fórmula para calcular el error. El 'Absoluto' mide la distancia directa entre iteraciones. El 'Relativo' y 'Porcentual' escalan esa diferencia según el tamaño de la raíz, ideal para números muy gigantes o microscópicos.")
+        
+        st.divider()
+        st.write("**🛑 Límites y Tolerancias**")
+        st.number_input("Límite de Iteraciones", min_value=10, max_value=1000, step=10, key="max_iters", help="El freno de emergencia. Si un método (como Punto Fijo) queda atrapado en un bucle infinito porque no converge, el programa abortará al alcanzar esta cantidad de pasos.")
+        
+        st.select_slider(
+            "Tolerancia de 'Cero Exacto'",
+            options=[1e-6, 1e-9, 1e-12, 1e-15],
+            format_func=lambda x: f"$10^{{{int(math.log10(x))}}}$",
+            key="cero_maquina",
+            help="Define qué tan cerca del cero debe estar f(x) para considerarlo un éxito. Si la función arroja un número menor a este valor microscópico, el programa asume que tocó el eje X."
+        )
+        
+        st.select_slider(
+            "Umbral de Divergencia",
+            options=[1e6, 1e15, 1e50, 1e100],
+            format_func=lambda x: f"$10^{{{int(math.log10(x))}}}$",
+            key="limite_infinito",
+            help="El límite de explosión para los métodos abiertos. Si en algún paso la variable x supera este número gigantesco, el programa asume que el método se descontroló hacia el infinito y aborta para evitar un error de desbordamiento (Overflow)."
+        )
+        
+        st.divider()
+        st.write("**🧪 Simulación Avanzada**")
+        # El toggle también usa key
+        st.toggle("Simular Aritmética Finita", key="simular_truncamiento", help="Activa el 'Modo Calculadora Antigua'. En lugar de usar la precisión total de la computadora, recorta artificialmente los decimales en cada paso para demostrar cómo el error de propagación arruina los cálculos.")
+        
+        if st.session_state.simular_truncamiento:
+            # Inicializamos su valor si no existe
+            if 'decimales_trunc' not in st.session_state:
+                st.session_state.decimales_trunc = 4
+            st.slider("Cifras decimales a retener", 2, 8, key="decimales_trunc",help="Cantidad de decimales que sobrevivirán en cada operación matemática. Bajalo a 2 o 3 para forzar a que métodos precisos como Newton fallen miserablemente.")
+            
+        st.divider()
+        st.write("**📄 Documentación**")
+        st.toggle("Mostrar consigna del TP", key="mostrar_pdf")
+        
+        st.divider()
+        st.button("🧹 Limpiar Caché", width='stretch', on_click=st.cache_data.clear)
+            
+        st.button("♻️ Restablecer Valores", width='stretch', on_click=restablecer_ajustes)     
 
 @st.cache_data(show_spinner=False)
 def generar_pdf_reporte(metodo, formula, parametros, raiz, historial_dict, fig):
@@ -177,18 +280,14 @@ def boton_descarga(metodo, formula, parametros, raiz, datos, fig):
             icon="📄"
         )
 
-def mostrar_panel_resultados(raiz, datos, grafico_f, converge=True):       
+def mostrar_panel_resultados(raiz, datos, grafico_f):       
     st.space('small')
-    if converge:
-        st.success(f'Raíz encontrada en: $x \\approx {raiz:.6f}$')
-        # Gráfico
-        with st.spinner(text='Generando grafica...'):
-            grafico.dibujar(grafico_f)
-        
-        # Expander para la tabla
-        with st.expander("Ver tabla de iteraciones"):
-            st.dataframe(datos,width='stretch',hide_index=False)
-    else:
-        st.error('El método DIVERGIÓ o no alcanzó la tolerancia requerida.')
-        st.info('💡 Intentá cambiar el punto inicial o los parámetros.')
-        st.warning(f'Último valor calculado: $x \\approx {raiz:.6f}$')
+    st.success(f'Raíz encontrada en: $x \\approx {raiz:.6f}$')
+    # Gráfico
+    with st.spinner(text='Generando grafica...'):
+        grafico.dibujar(grafico_f)
+    
+    # Expander para la tabla
+    with st.expander("Ver tabla de iteraciones"):
+        st.dataframe(datos,width='stretch',hide_index=False)
+

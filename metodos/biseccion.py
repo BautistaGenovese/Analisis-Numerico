@@ -50,7 +50,12 @@ def mostrar_info():
                 sup = st.number_input('Valor final b', value=10.0)
 
 
-            err_exp = st.slider('Precisión ($n$ en $10^{-n}$)', 1, 10, 2)
+            err_exp = st.select_slider(
+                    "Presición",
+                    options=[1,2,3,4,5,6,7,8,9,10],
+                    value=2,
+                    format_func=lambda x: f"$10^{{{-int(x)}}}$"
+                )
             err = 10**(-err_exp)
             
             st.divider()

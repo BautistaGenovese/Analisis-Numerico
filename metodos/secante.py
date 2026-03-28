@@ -1,4 +1,4 @@
-import streamlit as st
+import streamlit as st, math
 from core import algoritmos, grafico, utils as ut
 
 def mostrar_info():
@@ -35,7 +35,12 @@ def mostrar_info():
                 inf = st.number_input('Ingresar intervalo inferior',value=-10.0,step=2.0)
             with c2:
                 sup = st.number_input('Ingresar intervalo superior',value=10.0,step=2.0)
-            err_exp = st.slider('Precisión ($n$ en $10^{-n}$)', 1, 10, 2)
+            err_exp = st.select_slider(
+                    "Presición",
+                    options=[1,2,3,4,5,6,7,8,9,10],
+                    value=2,
+                    format_func=lambda x: f"$10^{{{-int(x)}}}$"
+                )
             err = 10**(-err_exp)
             st.divider()
             

@@ -6,10 +6,13 @@ import statistics
 
 def biseccion(f,a,b,err):
     
-    datos = Historial(['a[i]','b[i]','x[i]','f(x[i])','Dx[i]','Error Absoluto'])
-    
     fa = ut.evaluar_f(f,a)
     fb = ut.evaluar_f(f,b)
+    
+    max_iters = st.session_state.get('max_iters',100)
+    cero_maquina = st.session_state.get('cero_maquina', 1e-12)
+    tipo_err = st.session_state.get('tipo_error', 'Absoluto')
+    datos = Historial(['a[i]','b[i]','x[i]','f(x[i])','Dx[i]',f'Error {tipo_err}'])
 
     # Casos base
     if fa * fb >= 0:
@@ -18,14 +21,20 @@ def biseccion(f,a,b,err):
         a, b = b, a
         fa, fb = fb, fa
     
-    # Calculo de la raíz
+    # Variables útiles
     x_anterior=a
     iteracion=0
-    while iteracion < 100:
+    
+    # Calculo de la raíz
+    while iteracion < max_iters:
         
         x=(a+b)/2
         fx=ut.evaluar_f(f,x)
-        err_abs = abs(b-a)/2
+        # Ignora la iteración 0 para el relativo
+        if iteracion > 0:
+            err_cal = ut.calcular_error(x, x_anterior)
+        else:
+            err_cal = abs(b - a) / 2 # Error clásico inicial
         
         datos.agregar({
             'a[i]':a,
@@ -33,15 +42,15 @@ def biseccion(f,a,b,err):
             'x[i]':x,
             'f(x[i])':fx,
             'Dx[i]':(x-a),
-            'Error Absoluto':err_abs
+            f'Error {tipo_err}':err_cal
         })
 
         # Frena cuando el resultado es demasiado cercano al cero
-        if abs(fx) < 1e-12: 
+        if abs(fx) < cero_maquina: 
             return x, datos
             
         # Cierra el ciclo cuando la diferencia entre cada iteración es minima
-        if abs(x - x_anterior) < err:
+        if err_cal < err and iteracion > 0:
             break
         
         # Opciones
@@ -59,31 +68,36 @@ def biseccion(f,a,b,err):
 
 def secante(f,a,b,err):
     
-    datos = Historial(['a[i]','b[i]','x[i]','f(x[i])','Dx[i]','Error Absoluto'])
-    
     fa = ut.evaluar_f(f,a)
     fb = ut.evaluar_f(f,b)
+    
+    max_iters = st.session_state.get('max_iters',100)
+    cero_maquina = st.session_state.get('cero_maquina', 1e-12)
+    tipo_err = st.session_state.get('tipo_error', 'Absoluto')
+    datos = Historial(['a[i]','b[i]','x[i]','f(x[i])','Dx[i]',f'Error {tipo_err}'])
 
     # Casos base
     if fa * fb >= 0:
-        return None, datos.obtener_datos()
+        return None, datos
     if a  > b:
         a, b = b, a
         fa, fb = fb, fa
     
-    # Calculo de la raíz
+    # Variables útiles
     x_anterior=a
     iteracion=0
-    while iteracion < 100:
+    
+    # Calculo de la raíz
+    while iteracion < max_iters:
         
         # Frena si es que la diferencia entre las derivadas es cercana al cero
-        if abs(fb - fa) < 1e-12:
+        if abs(fb - fa) < cero_maquina:
             st.warning("División por cero en secante. Los puntos están muy cerca.")
             return None, datos
         
         x = b - (fb * (b - a)) / (fb - fa)
         fx = ut.evaluar_f(f, x)
-        err_abs = abs(b - a)
+        err_cal = ut.calcular_error(x, x_anterior)
 
         datos.agregar({
             'a[i]':a,
@@ -91,21 +105,21 @@ def secante(f,a,b,err):
             'x[i]':x,
             'f(x[i])':fx,
             'Dx[i]':(x-a),
-            'Error Absoluto':err_abs
+            f'Error {tipo_err}':err_cal
         })
         
-        # Frena cuando el resultado es demasiado cercano al cero
-        if abs(fx) < 1e-12: 
+        # Condiciones de corte 
+        if abs(fx) < cero_maquina: 
             return x, datos
             
-        # Cierra el ciclo cuando la diferencia entre cada iteración es minima
-        if abs(x - x_anterior) < err:
+        if err_cal < err:
             break
         
         # Opciones
         if fx * fa < 0:
             b = x
             fb = fx
+            
         else:
             a = x
             fa = fx
@@ -116,22 +130,29 @@ def secante(f,a,b,err):
     return x, datos
 
 def newton(x_n,f,err):
-   # Creamos el diccionario para guardar las iteraciones
-    datos = Historial({'x[i]','f(x[i])',"f'(x[i])",'x[i+1]','Error Absoluto'})
     
+    max_iters = st.session_state.get('max_iters',100)
+    cero_maquina = st.session_state.get('cero_maquina', 1e-12)
+    limite_infinito = st.session_state.get('limite_infinito', 1e-12)
+    tipo_err = st.session_state.get('tipo_error', 'Absoluto')
+    datos = Historial({'x[i]','f(x[i])',"f'(x[i])",'x[i+1]',f'Error {tipo_err}'})
+    
+    # Variables útiles
     iteracion=0
-    while iteracion < 100:
+    
+    # Cálculo de la raíz
+    while iteracion < max_iters:
         fa = ut.evaluar_f(f, x_n)
         derivada = str(sp.diff(f, 'x'))
-        d_evaluada = round(ut.evaluar_f(derivada, x_n), 6)
+        d_evaluada = ut.evaluar_f(derivada, x_n)
         
         # Evitamos la división por cero si la derivada da 0
         if d_evaluada == 0:
             return None, datos
             
         x_n1 = x_n - (fa / d_evaluada)
-        
-        err_abs = abs(x_n1 - x_n)
+        err_cal = ut.calcular_error(x_n1, x_n)
+
 
         # Guardamos los datos de esta vuelta en el cuadro
         datos.agregar({
@@ -139,53 +160,61 @@ def newton(x_n,f,err):
             'f(x[i])':fa,
             "f'(x[i])":d_evaluada,
             'x[i+1]':x_n1,
-            'Error Absoluto':err_abs
+            f'Error {tipo_err}':err_cal
             })
 
-        # Condición de corte
-        if abs(ut.evaluar_f(f, x_n1)) <= 1e-12:
+        # Condiciones de corte
+        if abs(x_n1) > limite_infinito:
+            return None, datos
+        
+        if abs(ut.evaluar_f(f, x_n1)) <= cero_maquina:
             return x_n1, datos
         
-        # Condición de corte por si se estanca
-        if abs(x_n1 - x_n) <= err:
+        if err_cal <= err:
             return x_n1, datos
         
         x_n=x_n1
         iteracion+=1
 
 def punto_fijo (g,x0, err):
-   
-    datos = Historial(['x[i]','g(x[i])','Error Absoluto'])
     
+    max_iters = st.session_state.get('max_iters',100)
+    cero_maquina = st.session_state.get('cero_maquina', 1e-12)
+    limite_infinito = st.session_state.get('limite_infinito', 1e-12)
+    tipo_err = st.session_state.get('tipo_error', 'Absoluto')
+    datos = Historial(['x[i]','g(x[i])',f'Error {tipo_err}'])
+    
+    # Variables útiles
     x_actual=x0
     iteracion=0
-    while iteracion < 100:
+    
+    # Cálculo de la raíz
+    while iteracion < max_iters:
         try:
             x_nuevo = ut.evaluar_f(g, x_actual)
-            err_abs = abs(x_nuevo - x_actual)
+            err_cal = ut.calcular_error(x_nuevo, x_actual)
             
             datos.agregar({
             'x[i]':x_actual,
             'g(x[i])':x_nuevo,
-            'Error Absoluto':err_abs
+            f'Error {tipo_err}':err_cal
             })
-            
-            # Sale si el error absoluto es demasiado grande
-            if err_abs > 1e6:
-                return x_nuevo, datos, False
-            
-            # |x_(i+1) - x_i| <= ε
-            if err_abs <= err:
-                
-                return x_nuevo, datos, True
+    
+            # Condiciones de corte
+            if err_cal > limite_infinito:
+                return None, datos  # Divergió (devuelve None)
+
+            if err_cal <= err:
+                return x_nuevo, datos  # Convergió (devuelve la raíz)
             
             x_actual = x_nuevo
             
         except Exception:
-            return None, datos, False
+            return None, datos # Explotó la matemática
         
         iteracion+=1        
-    return x_actual, datos, False
+        
+    return None, datos # Llegó al límite de iteraciones sin converger
 
 def calcular_regresion(x_vals, y_vals):
     """

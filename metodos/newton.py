@@ -35,8 +35,15 @@ def mostrar_info():
             st.divider()
 
             x_n = st.number_input('Ingresar valor inicial $(x_n)$',value=-10.0,step=2.0)
-            err_exp = st.slider('Precisión ($n$ en $10^{-n}$)', 1, 10, 2)
+            
+            err_exp = st.select_slider(
+                    "Presición",
+                    options=[1,2,3,4,5,6,7,8,9,10],
+                    value=2,
+                    format_func=lambda x: f"$10^{{{-int(x)}}}$"
+                )
             err = 10**(-err_exp)
+            
             st.divider()
             try:
                 raiz, datos = algoritmos.newton(x_n, formula, err)

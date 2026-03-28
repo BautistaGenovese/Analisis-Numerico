@@ -51,13 +51,18 @@ def mostrar_info():
             
             x_inicial = st.number_input('Ingresar punto de inicio $$(x_0)$$', value=1.0, step=0.5)
 
-            err_exp = st.slider('Precisión ($n$ en $10^{-n}$)', 1, 10, 2)
+            err_exp = st.select_slider(
+                    "Presición",
+                    options=[1,2,3,4,5,6,7,8,9,10],
+                    value=2,
+                    format_func=lambda x: f"$10^{{{-int(x)}}}$"
+                )
             err = 10**(-err_exp)
             
             st.divider()
             
             try:
-                raiz, datos, converge = algoritmos.punto_fijo(formula_g, x_inicial, err)
+                raiz, datos = algoritmos.punto_fijo(formula_g, x_inicial, err)
                 
                 if raiz is not None:
                     
@@ -90,11 +95,9 @@ def mostrar_info():
         with col_out:
             st.space('small')
             if 'raiz' in locals() and raiz is not None:
-                ut.mostrar_panel_resultados(raiz,datos.obtener_datos(),grafico_func,converge)
+                ut.mostrar_panel_resultados(raiz,datos.obtener_datos(),grafico_func)
             else:
                 st.error('Ocurrió un error matemático durante el cálculo (probablemente la función divergió hacia el infinito o hay raíces complejas).')
-                    
-
 
     st.divider()
     st.header('Lógica en Python (Punto Fijo)')

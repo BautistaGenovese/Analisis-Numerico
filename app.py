@@ -1,5 +1,6 @@
 import streamlit as st
 import inicio
+from core import utils as ut
 from metodos import biseccion, secante, newton, punto_fijo, regresion, comparacion
 
 st.set_page_config(
@@ -12,10 +13,16 @@ st.set_page_config(
 estilo = """
     <style>
     /* Ocultar barra superior por defecto */
+    
+    body {
+        padding: 0 100px !important;
+    }
+    
     header {visibility: hidden !important;}
     
     /* Espaciado del contenido */
     .block-container {
+        max-width: 1400px;
         padding-top: 2rem !important; 
         padding-bottom: 6rem !important; 
     }
@@ -50,8 +57,8 @@ st.markdown(estilo, unsafe_allow_html=True)
 
 def main():
     with st.container(border=True):
-        # 1 parte para el logo, 2 partes para que los botones tengan espacio para irse a la derecha
-        col_logo, col_nav = st.columns([1, 2], vertical_alignment="center") 
+        
+        col_logo, col_nav, col_ajustes = st.columns([1.2, 3, 0.3], vertical_alignment="center") 
         
         with col_logo:
             st.markdown("""
@@ -68,6 +75,9 @@ def main():
                 selection_mode='single',
                 label_visibility="collapsed"
             )
+            
+        with col_ajustes:
+            ut.mostrar_menu_ajustes()           
 
     st.write("") # Espacio separador
     
@@ -75,9 +85,11 @@ def main():
     if choice == 'Inicio' or choice is None:
         inicio.inicio()
     else:
-        if st.checkbox("📄 Mostrar Consigna del TP"):
-            st.pdf("archivos/Consigna Tp 1 inf tele.pdf") 
-
+        
+        if st.session_state.get('mostrar_pdf', False):
+            st.pdf("archivos/Consigna Tp 1 inf tele.pdf")
+        
+        # Rutas normales
         if choice == 'Bisección':
             biseccion.mostrar_info()
         elif choice == 'Secante':

@@ -42,10 +42,9 @@ def renderizar_metodo(nombre_metodo, id_columna, formula, err):
             with c1: g_form = st.text_input('Función despejada $g(x)$:', value=f"x - ({formula})", key=f"g_{id_columna}")
             with c2: x0 = st.number_input('Punto inicial $x_0$', value=0.0, key=f"pf_x0_{id_columna}")
 
-            raiz, datos, converge = algoritmos.punto_fijo(g_form, x0, err)
-            if not converge: 
-                raiz = None # Si diverge, lo forzamos a None para que tire error abajo
-            elif raiz is not None:
+            raiz, datos = algoritmos.punto_fijo(g_form, x0, err)
+
+            if raiz is not None:
                 a_graf, b_graf = raiz - 5, raiz + 5
 
         fin = time.perf_counter()
@@ -69,60 +68,68 @@ def renderizar_metodo(nombre_metodo, id_columna, formula, err):
 # === FUNCIÓN PRINCIPAL ===
 
 def mostrar_info():
-    st.markdown("<h2 style='text-align: center;'>Comparación de Métodos</h2>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center;'>Comparación de Métodos</h1>", unsafe_allow_html=True)
     
-    # Datos Globales
-    formula = st.text_input('Escribe tu función $f(x)$:', value='x**2 + 11*x - 6')
-    st.caption("Usa `( )` para agrupar elementos. Por ejemplo `e^(1-x)` para $e^{1-x}$.")
-    st.latex(ut.mostrar_formula(formula))
-    
-    err_exp = st.slider('Precisión ($n$ en $10^{-n}$)', 1, 10, 2)
-    err = 10**(-err_exp)
-
-    # Selectores "VS"
-    col1, col2, col3 = st.columns([2, 1, 2], gap="small")
-    with col1:
-        opc1 = st.selectbox('Rincón Azul:', key='opc1', index=None, options=["Bisección", "Secante", "Newton", "Punto Fijo"])
-    with col2:
-        st.markdown("<h2 style='text-align: center; font-weight:800; margin-top: 15px;'>VS</h2>", unsafe_allow_html=True)
-    with col3:
-        opc2 = st.selectbox('Rincón Rojo:', key='opc2', index=None, options=["Bisección", "Secante", "Newton", "Punto Fijo"])
-
-    if opc1 is None or opc2 is None:
-        st.info('🧮 Selecciona dos métodos en los menús de arriba para comenzar la batalla.')
-    elif opc1 == opc2:
-        st.warning('⚠️ Por favor, elige métodos distintos para poder compararlos.')
-    else:
-        st.divider()
-        met1, met2 = st.columns(2, gap="large")
+    with st.container(border=True):
+        st.subheader("📥 Ingreso de datos")
         
-        with met1:
-            raiz_1, datos_1, nom_1, tiempo_1 = renderizar_metodo(opc1, "izq", formula, err)
-        with met2:
-            raiz_2, datos_2, nom_2, tiempo_2 = renderizar_metodo(opc2, "der", formula, err)
+        # Datos Globales
+        formula = st.text_input('Escribe tu función $f(x)$:', value='x**2 + 11*x - 6')
+        st.caption("Usa `( )` para agrupar elementos. Por ejemplo `e^(1-x)` para $e^{1-x}$.")
+        st.latex(ut.mostrar_formula(formula))
         
-        # === MÉTRICAS RÁPIDAS Y GRÁFICO FINAL ===
-        if raiz_1 is not None and raiz_2 is not None:
-            with st.expander("📊 Ver tablas detalladas de iteraciones"):
-                col_t1, col_t2 = st.columns(2)
-                with col_t1:
-                    st.markdown(f"**{nom_1}**")
-                    st.dataframe(datos_1.obtener_dataframe(),width='stretch')
-                with col_t2:
-                    st.markdown(f"**{nom_2}**")
-                    st.dataframe(datos_2.obtener_dataframe(),width='stretch')
+        err_exp = st.select_slider(
+                    "Presición",
+                    options=[1,2,3,4,5,6,7,8,9,10],
+                    value=2,
+                    format_func=lambda x: f"$10^{{{-int(x)}}}$"
+                )
+        err = 10**(-err_exp)
+
+        # Selectores "VS"
+        col1, col2, col3 = st.columns([2, 1, 2], gap="small")
+        with col1:
+            opc1 = st.selectbox('Rincón Azul:', key='opc1', index=None, options=["Bisección", "Secante", "Newton", "Punto Fijo"])
+        with col2:
+            st.markdown("<h2 style='text-align: center; font-weight:800; margin-top: 15px;'>VS</h2>", unsafe_allow_html=True)
+        with col3:
+            opc2 = st.selectbox('Rincón Rojo:', key='opc2', index=None, options=["Bisección", "Secante", "Newton", "Punto Fijo"])
+
+        if opc1 is None or opc2 is None:
+            st.info('🧮 Selecciona dos métodos en los menús de arriba para comenzar la batalla.')
+        elif opc1 == opc2:
+            st.warning('⚠️ Por favor, elige métodos distintos para poder compararlos.')
+        else:
             st.divider()
-            st.subheader("🏆 Resultados de la Comparación")
+            met1, met2 = st.columns(2, gap="large")
             
-            # Recuperamos datos crudos
-            d_izq = datos_1.obtener_datos()
-            d_der = datos_2.obtener_datos()
-            iters_1 = len(d_izq['x[i]'])
-            iters_2 = len(d_der['x[i]'])
+            with met1:
+                raiz_1, datos_1, nom_1, tiempo_1 = renderizar_metodo(opc1, "izq", formula, err)
+            with met2:
+                raiz_2, datos_2, nom_2, tiempo_2 = renderizar_metodo(opc2, "der", formula, err)
+            
+            # === MÉTRICAS RÁPIDAS Y GRÁFICO FINAL ===
+            if raiz_1 is not None and raiz_2 is not None:
+                with st.expander("📊 Ver tablas detalladas de iteraciones"):
+                    col_t1, col_t2 = st.columns(2)
+                    with col_t1:
+                        st.markdown(f"**{nom_1}**")
+                        st.dataframe(datos_1.obtener_dataframe(),width='stretch')
+                    with col_t2:
+                        st.markdown(f"**{nom_2}**")
+                        st.dataframe(datos_2.obtener_dataframe(),width='stretch')
+                st.divider()
+                st.subheader("🏆 Resultados de la Comparación")
+                
+                # Recuperamos datos crudos
+                d_izq = datos_1.obtener_datos()
+                d_der = datos_2.obtener_datos()
+                iters_1 = len(d_izq['x[i]'])
+                iters_2 = len(d_der['x[i]'])
 
-            costo_1 = 2 + iters_1 if nom_1 != "Newton" else 2 * iters_1
-            costo_2 = 2 + iters_2 if nom_2 != "Newton" else 2 * iters_2
-            
+                costo_1 = 2 + iters_1 if nom_1 != "Newton" else 2 * iters_1
+                costo_2 = 2 + iters_2 if nom_2 != "Newton" else 2 * iters_2
+                
             # --- DISEÑO DE BATALLA (Limpio y Nativo) ---
             st.markdown("<br>", unsafe_allow_html=True) # Un espaciecito extra para que respire
             
