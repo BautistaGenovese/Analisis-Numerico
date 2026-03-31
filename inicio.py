@@ -153,9 +153,9 @@ def inicio():
         st.write("Dominador absoluto de los bucles `while` y cazador implacable de divisiones por cero.")
         
     with f1_3:
-        st.markdown("#### 🥷 Brisa Romero")
-        st.caption("Rol: QA Destructivo")
-        st.write("El tester que rompía la app poniendo $10^{100}$ en los inputs para ver qué explotaba.")
+        st.markdown("#### 🧞‍♂️ Juan Giron")
+        st.caption("Rol: Recolector de ideas")
+        st.write("Es el puente que organiza y traduce esas chispas sueltas en la base sólida de un nuevo proyecto.")
         
     with f1_4:
         st.markdown("#### 🎨 Trini Kildegaard")
@@ -168,12 +168,12 @@ def inicio():
     f2_1, f2_2, f2_3 = st.columns(3)
     
     with f2_1:
-        st.markdown("#### 🧉 Juan Giron")
+        st.markdown("#### 🧉 Brisa Romero")
         st.caption("Rol: Scrum Master & Mates")
         st.write("Líder espiritual. Mantuvo la moral alta y el termo siempre lleno en las madrugadas de código.")
         
     with f2_2:
-        st.markdown("#### 🧙‍♂️ Micaias Villa")
+        st.markdown("#### 🧙‍♂️ Micaías Villa")
         st.caption("Rol: Git Master & DevOps")
         st.write("El salvador de los *merge conflicts*. Su único miedo es que no compile en la PC del profe.")
         
