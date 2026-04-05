@@ -1,14 +1,15 @@
 [theme]
-# Un cian eléctrico brillante. Llama muchísimo la atención sobre fondo oscuro.
-primaryColor = "#06b6d4" 
+# El botón de accionar y detalles importantes
+primaryColor = "#3b82f6" 
 
-# Un azul/gris casi negro, súper elegante (no es negro puro).
-backgroundColor = "#F0F8FF"
+# Fondo general de la app (Celeste clarito)
+backgroundColor = "#ffffff"
 
-# Un tono apenas más claro para diferenciar la barra lateral.
-secondaryBackgroundColor = "#1e293b" 
+# Fondo del menú lateral (Gris/Blanco para que haga contraste suave)
+secondaryBackgroundColor = "#f8fafc" 
 
-# Texto blanco hueso para que no canse la vista.
-textColor = "#f8fafc" 
+# Texto oscuro para modo claro
+textColor = "#0f172a" 
+
 font = "sans serif"
 base = "light"

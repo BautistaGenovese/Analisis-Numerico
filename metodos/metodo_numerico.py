@@ -97,7 +97,8 @@ class MetodoNumerico(ABC):
         """
         
         # --- 1. ZONA DEL TÍTULO ---
-        st.markdown(f"<h1 style='text-align: center;'>Método {self.nombre}</h1>", unsafe_allow_html=True)
+        # st.markdown(f"<h1 style='text-align: center;'>Método {self.nombre}</h1>", unsafe_allow_html=True)
+        st.title(f'Método {self.nombre}')
         
         # --- 2. ZONA DE TEORÍA ---
         self.render_teoria()
@@ -108,7 +109,14 @@ class MetodoNumerico(ABC):
         # --- 3. ZONA ENTRADA DE DATOS ---
         with col_input:
             with st.container(border=True):
-                st.subheader("📥 Ingreso de datos")
+                # st.subheader("📥 Ingreso de datos")
+                st.markdown(f"""
+                            <div style='display:flex; align-items:center;'>
+                                <h4 style='margin:auto;'>Parámetros <b style='display:inline; padding:0 4px;  background-color: #cfe5fc; border-radius:5px; margin:auto 0; color:#3b82f6;'>{self.nombre.lower()}</b>
+                                </h4>
+                            </div>
+                                """,unsafe_allow_html=True)
+                            
                 f, err, exponente_err = self.render_formula()
                 
                 params = self.render_inputs(key=self.nombre)

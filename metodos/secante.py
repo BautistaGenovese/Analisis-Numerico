@@ -74,3 +74,7 @@ def secante(x_n1, x_n, f, err):
     
     def get_rango_grafico(self, raiz, **params):
         return raiz-5, raiz+5
+
+if __name__ == "__main__":
+    app = Secante()
+    app.mostrar_info()

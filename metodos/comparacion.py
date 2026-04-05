@@ -62,7 +62,8 @@ class Comparacion(MetodoNumerico):
         return super().get_rango_grafico(raiz, **params)
 
     def mostrar_info(self):
-        st.markdown(f"<h1 style='text-align: center;'>{self.nombre}</h1>", unsafe_allow_html=True)
+        st.title(self.nombre)
+        # st.markdown(f"<h1 style='text-align: center;'>{self.nombre}</h1>", unsafe_allow_html=True)
         
         self.render_teoria()
         
@@ -265,3 +266,7 @@ class Comparacion(MetodoNumerico):
 
                 else:
                     st.error('😥 No se ha encontrado la raíz o uno de los métodos diverge.')
+
+if __name__ == "__main__":
+    app = Comparacion()
+    app.mostrar_info()

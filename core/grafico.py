@@ -21,7 +21,7 @@ def generar_base_fig(f, raiz, inf, sup,key=None):
         x=x, y=y, 
         mode='lines', 
         name='f(x)' if key!='graf_punto fijo' else 'g(x)', 
-        line=dict(color='#1E88E5', width=3)
+        line=dict(color='#3b82f6', width=3)
     ))
     if key == 'graf_punto fijo':
         fig.add_trace(go.Scatter(
@@ -301,7 +301,7 @@ def dibujar_batalla_errores(historial_izq, historial_der, nombre_izq, nombre_der
         y=err_izq,
         mode='lines+markers',
         name=nombre_izq,
-        line=dict(color='#2E86C1', width=3),
+        line=dict(color='#3b82f6', width=3),
         marker=dict(size=6)
     ))
 
@@ -311,7 +311,7 @@ def dibujar_batalla_errores(historial_izq, historial_der, nombre_izq, nombre_der
         y=err_der,
         mode='lines+markers',
         name=nombre_der,
-        line=dict(color='#e74c3c', width=3, dash='dash'),
+        line=dict(color='#ef4444', width=3, dash='dash'),
         marker=dict(size=6)
     ))
 
@@ -319,22 +319,32 @@ def dibujar_batalla_errores(historial_izq, historial_der, nombre_izq, nombre_der
         title="Batalla de Convergencia: Decaimiento del Error",
         xaxis_title="Número de Iteración",
         yaxis_title="Error (Tolerancia)",
-        yaxis_type="log",
+        
+        # ✅ Mismo template que generar_base_fig
+        template='plotly_white',
         
         yaxis=dict(
             type="log",
-            tickformat="~g",   # Muestra: 10, 1, 0.1, 0.01 — más limpio
+            tickformat="~g",
             dtick=1,
+            showgrid=True,
+            gridcolor='rgba(200, 200, 200, 0.2)',  # ✅ Igual que base
+            zeroline=True,
+            zerolinecolor='rgba(176, 196, 222, 0.8)',
+            zerolinewidth=2.5
         ),
-        
+        xaxis=dict(
+            showgrid=True,
+            gridcolor='rgba(200, 200, 200, 0.2)',  # ✅ Igual que base
+            zeroline=True,
+            zerolinecolor='rgba(176, 196, 222, 0.8)',
+            zerolinewidth=2.5
+        ),
         legend=dict(yanchor="top", y=0.99, xanchor="right", x=0.99),
         hovermode="x unified",
-        dragmode=False
+        dragmode=False,
+        margin=dict(l=40, r=40, t=60, b=40),
     )
-    
-    # Cuadrícula suave
-    fig.update_xaxes(showgrid=True, gridwidth=1, gridcolor='rgba(255,255,255,0.05)')
-    fig.update_yaxes(showgrid=True, gridwidth=1, gridcolor='rgba(255,255,255,0.05)')
 
     # Renderizamos en Streamlit
     st.plotly_chart(
@@ -375,7 +385,7 @@ def dibujar_radar_veredicto(nombre_izq, scores_izq, nombre_der, scores_der):
         theta=categorias_cerrado,
         fill='toself', # Relleno de área
         name=nombre_izq,
-        line=dict(color='#2E86C1', width=3),
+        line=dict(color='#3b82f6', width=3),
         marker=dict(size=6)
     ))
 
@@ -385,7 +395,7 @@ def dibujar_radar_veredicto(nombre_izq, scores_izq, nombre_der, scores_der):
         theta=categorias_cerrado,
         fill='toself', # Relleno de área
         name=nombre_der,
-        line=dict(color='#e74c3c', width=3, dash='dash'), 
+        line=dict(color='#ef4444', width=3, dash='dash'),
         marker=dict(size=6)
     ))
 
@@ -393,35 +403,35 @@ def dibujar_radar_veredicto(nombre_izq, scores_izq, nombre_der, scores_der):
     fig.update_layout(
         title=dict(
             text="🏆 Veredicto de Batalla",
-            font=dict(size=16) # Achicamos un pelín el título
+            font=dict(size=16, color='#0f172a')  # ✅ Texto oscuro
         ),
         polar=dict(
             radialaxis=dict(
                 visible=True,
                 range=[0, 10],
-                gridcolor='rgba(255,255,255,0.1)',
-                tickfont=dict(color="gray", size=10) # Achicamos los numeritos
+                gridcolor='rgba(200, 200, 200, 0.4)',   # ✅ Grilla clara
+                tickfont=dict(color='#64748b', size=10)  # ✅ Gris medio
             ),
             angularaxis=dict(
-                tickfont=dict(color="white", size=11), # Achicamos los textos de las puntas
-                gridcolor='rgba(255,255,255,0.1)'
+                tickfont=dict(color='#0f172a', size=11), # ✅ Oscuro, no blanco
+                gridcolor='rgba(200, 200, 200, 0.4)'     # ✅ Grilla clara
             ),
-            bgcolor='rgba(0,0,0,0)' 
+            bgcolor='rgba(248, 250, 252, 0.8)'           # ✅ Fondo clarito, no transparente
         ),
-        paper_bgcolor='rgba(0,0,0,0)',
-        font=dict(color="white"),
+        
+        # ✅ Fondo blanco en vez de transparente (que mostraba el oscuro de abajo)
+        paper_bgcolor='#ffffff',
+        plot_bgcolor='#ffffff',
+        font=dict(color='#0f172a'),  # ✅ Todo el texto oscuro
         
         legend=dict(
-            orientation="h",       # Horizontal
-            yanchor="top", y=-0.2, # La tiramos abajo del gráfico
-            xanchor="center", x=0.5 # Bien centrada
+            orientation="h",
+            yanchor="top", y=-0.15,
+            xanchor="center", x=0.5,
+            font=dict(color='#0f172a')  # ✅
         ),
-        
-        # (l=left, r=right, t=top, b=bottom)
         margin=dict(l=25, r=25, t=40, b=20),
-        
-        # FORZAR ALTURA MÍNIMA (Para que no se achiche)
-        height=350 
+        height=350
     )
     
     # Renderizamos en Streamlit

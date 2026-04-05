@@ -88,3 +88,7 @@ def biseccion(a,b,err):
     
     def get_rango_grafico(self, raiz, **params):
         return params['a'], params['b']
+
+if __name__ == "__main__":
+    app = Biseccion()
+    app.mostrar_info()

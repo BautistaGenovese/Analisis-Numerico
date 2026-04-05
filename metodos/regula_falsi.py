@@ -93,3 +93,7 @@ def regula_falsi(a,b,err):
     
     def get_rango_grafico(self, raiz, **params):
         return params['a'], params['b']
+
+if __name__ == "__main__":
+    app = Regula_Falsi()
+    app.mostrar_info()

@@ -1,31 +1,277 @@
-/* --- 1. FONDO GLOBAL CELESTE Y TEXTO OSCURO --- */
+/* ==========================================================================
+   ROOOTY LAB - HOJA DE ESTILOS PRINCIPAL
+   ========================================================================== */
+
+/* --- 0. IMPORTAR FUENTES --- */
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Manrope:wght@200..800&display=swap');
+
+
+/* --- 1. CONFIGURACIÓN GLOBAL --- */
+.block-container {
+    max-width: 1400px; /* Limito el ancho máximo */
+}
+
 .stApp, [data-testid="stAppViewContainer"] {
     background-color: #F0F8FF !important; /* Celeste clarito */
 }
 
-[data-testid="stSidebar"] {
-    background-color: #f8fafc !important; 
-    border-right: 1px solid #e2e8f0 !important;
+/* Fuente global inteligente (evita romper íconos y LaTeX) */
+.stApp, .stApp p, .stApp h1, .stApp h2, .stApp h3, .stApp h4, .stApp label, .stApp li, button {
+    font-family: 'Manrope', sans-serif !important;
 }
 
-/* ☢️ REGLA ARREGLADA: Le sacamos el 'span' y el 'div' para no romper el código Python */
+/* Color de texto global oscuro */
 .stApp p, .stApp label, .stApp li, .stApp h1, .stApp h2, .stApp h3, .stApp h4 {
     color: #0f172a !important;
 }
 
-/* Excepción B: Código de Python (Solo el fondo oscuro, dejamos que Python pinte las letras) */
-div[data-testid="stCodeBlock"] {
+
+/* --- 2. HEADER (BARRA SUPERIOR) --- */
+header[data-testid="stHeader"] {
+    background-color: rgba(240, 248, 255, 0.85) !important; 
+    backdrop-filter: blur(5px) !important;
+    -webkit-backdrop-filter: blur(5px) !important;
+}
+
+
+/* --- 3. BARRA LATERAL (SIDEBAR) Y NAVEGACIÓN --- */
+[data-testid="stSidebar"] {
+    background-color: #f8fafc !important; 
+    border-right: 1px solid #e2e8f0 !important;
+    min-width: 280px !important;
+    max-width: 280px !important;
+}
+
+[data-testid="stSidebarResizeHandle"] {
+    display: none !important;
+}
+
+/* Links de navegación */
+[data-testid="stSidebar"] div[data-testid="stPageLink"],
+[data-testid="stSidebar"] a[data-testid="stPageLink"] {
+    border: 1px solid #cbd5e1 !important; 
+    border-radius: 8px !important;        
+    margin-bottom: 8px !important;        
+    background-color: #ffffff !important; 
+    transition: all 0.2s ease-in-out !important; 
+    padding: 2px 5px !important;
+}
+
+[data-testid="stSidebar"] div[data-testid="stPageLink"]:hover,
+[data-testid="stSidebar"] a[data-testid="stPageLink"]:hover {
+    border-color: #3b82f6 !important;     
+    background-color: #f1f5f9 !important; 
+    transform: translateX(4px) !important; 
+}
+
+[data-testid="stSidebar"] [data-testid="stPageLink"] p {
+    color: #1e293b !important;
+    font-weight: 600 !important;
+    margin: 0 !important;
+}
+
+/* Link de página activa */
+[data-testid="stSidebar"] [data-testid="stPageLink"][data-active="true"] {
+    border-color: #3b82f6 !important;
+    border-left: 5px solid #3b82f6 !important; 
+    background-color: #eff6ff !important;
+}
+
+
+/* --- 4. INPUTS Y FORMULARIOS --- */
+div[data-baseweb="input"] > div,
+div[data-baseweb="number-input"] > div,
+[data-testid="stTextInputRootElement"] > div,
+[data-testid="stNumberInputContainer"] {
+    background-color: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+}
+
+div[data-baseweb="input"]:focus-within > div,
+div[data-baseweb="number-input"]:focus-within > div,
+[data-testid="stTextInputRootElement"]:focus-within > div,
+[data-testid="stNumberInputContainer"]:focus-within {
+    background-color: #ffffff !important;
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
+}
+
+div[data-baseweb="select"] > div {
+    background-color: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+}
+
+div[data-baseweb="select"]:focus-within > div {
+    background-color: #ffffff !important;
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
+}
+
+/* Fuente técnica para textos ingresados */
+.stTextInput input, 
+.stNumberInput input,
+div[data-baseweb="input"] input,
+div[data-baseweb="number_input"] input {
+    font-family: 'JetBrains Mono', monospace !important; 
+    font-weight: 600 !important;
+    color: #1e293b !important;
+}
+
+
+/* --- 5. BOTONES (ESTILO UNIFICADO) --- */
+.stButton > button,
+div[data-testid="stDownloadButton"] button {
+    background: #cfe5fc !important; 
+    border: 1px solid #3b82f6 !important; 
+    border-radius: 8px !important;
+    transition: all 0.3s ease !important;
+}
+
+.stButton > button p, 
+.stButton > button span,
+.stButton > button div,
+div[data-testid="stDownloadButton"] button p,
+div[data-testid="stDownloadButton"] button span {
+    color: #3b82f6 !important; 
+    font-weight: 700 !important;
+}
+
+.stButton > button:hover,
+div[data-testid="stDownloadButton"] button:hover {
+    background: #3b82f6 !important; 
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3) !important;
+}
+
+.stButton > button:hover p, 
+.stButton > button:hover span,
+.stButton > button:hover div,
+div[data-testid="stDownloadButton"] button:hover p,
+div[data-testid="stDownloadButton"] button:hover span {
+    color: #ffffff !important;
+}
+
+
+/* --- 6. CONTENEDORES, EXPANDERS Y DATAFRAMES --- */
+[data-testid="stVerticalBlock"][data-test-scroll-behavior="normal"] {
+    background-color: #ffffff !important;
+    border: 1px solid #e8f0fe !important;
+    border-radius: 12px !important;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.06),
+                0 1px 3px rgba(0, 0, 0, 0.04) !important;
+    padding: 1.2rem 1.5rem !important;
+    transition: all 0.3s ease-in-out !important;
+}
+
+[data-testid="stExpander"] {
+    background-color: #ffffff !important;
+    border: 1px solid #e8f0fe !important;
+    border-radius: 10px !important;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.06),
+                0 1px 3px rgba(0, 0, 0, 0.04) !important;
+    transition: all 0.3s ease-in-out !important;
+    overflow: hidden !important;
+}
+
+[data-testid="stTable"],
+[data-testid="stTable"] table,
+[data-testid="stTable"] th,
+[data-testid="stTable"] td,
+[data-testid="stTable"] span,
+[data-testid="stTable"] div {
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 0.9rem !important; /* Un pelito más grande para que se lea perfecto */
+}
+
+/* Opcional: Centrar los números en la tabla para que se vea más prolijo */
+[data-testid="stTable"] td, 
+[data-testid="stTable"] th {
+    text-align: center !important;
+}
+
+
+/* --- 7. CÓDIGO PYTHON Y LATEX --- */
+.stApp div[data-testid="stCodeBlock"] {
     background-color: #0f172a !important;
     border-radius: 10px !important;
     border: 1px solid #1e293b !important;
 }
-/* Le devolvemos la libertad a las letras del código */
+
+.stApp div[data-testid="stCodeBlock"] pre,
+.stApp div[data-testid="stCodeBlock"] code,
+.stApp div[data-testid="stCodeBlock"] span {
+    font-family: 'JetBrains Mono', monospace !important;
+}
+
 div[data-testid="stCodeBlock"] * {
     color: inherit;
 }
-/* --- 2. EXCEPCIONES (DONDE EL TEXTO SÍ DEBE SER BLANCO) --- */
 
-/* Excepción A: Hero Banner de Inicio */
+[data-testid="stCode"] {
+    border: 1px solid #e8f0fe !important;
+    border-radius: 12px !important;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.06),
+                0 1px 3px rgba(0, 0, 0, 0.04) !important;
+    overflow: hidden !important;
+    transition: all 0.3s ease-in-out !important;
+    font-family: 'JetBrains Mono', monospace !important; 
+}
+
+.stApp .katex, 
+.stApp .katex * {
+    color: #1a2b4c !important;
+}
+
+
+/* --- 8. MENÚ DE AJUSTES (POPOVER) --- */
+[data-testid="stPopover"],
+[data-testid="stPopover"] > div {
+    background-color: #ffffff !important;
+    border: 1px solid #e8f0fe !important;
+    border-radius: 12px !important;
+}
+
+[data-testid="stPopover"] p,
+[data-testid="stPopover"] span,
+[data-testid="stPopover"] label,
+[data-testid="stPopover"] div,
+[data-testid="stPopover"] h1,
+[data-testid="stPopover"] h2,
+[data-testid="stPopover"] h3 {
+    color: #0f172a !important;
+}
+
+[data-testid="stPopover"] svg {
+    fill: #0f172a !important;
+    color: #0f172a !important;
+}
+
+[data-testid="stPopover"] div[data-baseweb="input"] > div,
+[data-testid="stPopover"] div[data-baseweb="select"] > div,
+[data-testid="stPopover"] [data-testid="stNumberInputContainer"] {
+    background-color: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+}
+
+[data-testid="stPopover"] hr {
+    border-color: #e2e8f0 !important;
+}
+
+[data-testid="stPopover"] .stButton > button {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+    border-radius: 8px !important;
+    width: 100% !important;
+}
+
+[data-testid="stPopover"] .stButton > button p,
+[data-testid="stPopover"] .stButton > button span {
+    color: #ffffff !important;
+}
+
+
+/* --- 9. HERO BANNER Y ANIMACIONES --- */
 .hero-banner {
     background-color: #1a2b4c; 
     border-radius: 15px; 
@@ -33,73 +279,76 @@ div[data-testid="stCodeBlock"] * {
     margin-bottom: 3rem; 
     box-shadow: 0 10px 25px rgba(26,43,76,0.2);
 }
+
 .hero-banner p, .hero-banner span, .hero-banner h1, .hero-banner div, .curve-label {
     color: #ffffff !important;
 }
 
-/* Excepción B: Código de Python (BLINDADO) */
-.stApp div[data-testid="stCodeBlock"] {
-    background-color: #0f172a !important;
-    border-radius: 10px !important;
-    border: 1px solid #1e293b !important;
-}
-
-/* El asterisco obliga a que CADA letra adentro del código sea blanca sí o sí */
-.stApp div[data-testid="stCodeBlock"] * {
-    color: #e2e8f0 !important; 
-}
-
-/* Excepción C: Botones (Calcular, etc.) */
-.stButton > button {
-    background: linear-gradient(135deg, #1e293b 0%, #334155 100%) !important;
-    border: none !important;
-}
-.stButton > button p, .stButton > button span, .stButton > button div {
-    color: #ffffff !important;
-}
-
-/* Excepción D: Menú de Ajustes */
-div[data-testid="stPopoverBody"] {
-    background-color: #1e293b !important;
-}
-div[data-testid="stPopoverBody"] p, div[data-testid="stPopoverBody"] span, div[data-testid="stPopoverBody"] label, div[data-testid="stPopoverBody"] div {
-    color: #f8fafc !important;
-}
-div[data-testid="stPopoverBody"] svg {
-    fill: #f8fafc !important;
-    color: #f8fafc !important;
-}
-
-/* --- 3. EL GRÁFICO DEL BANNER --- */
-.curve-container {
-    position: relative; width: 100%; height: 180px;
-}
+.curve-container { position: relative; width: 100%; height: 180px; }
 .axis { position: absolute; background-color: rgba(255, 255, 255, 0.1) !important; }
 .axis-x { width: 100%; height: 1px; bottom: 0; }
 .axis-y { width: 1px; height: 100%; left: 10%; }
+
 .curve-line {
     position: absolute; bottom: 20px; left: 10%; width: 80%; height: 120px;
     border-bottom: 3px solid transparent; border-left: 3px solid transparent;
     border-radius: 50% 50% 0 0; border-top: 3px solid #00A38C;
 }
+
 .point-dot {
     position: absolute; width: 10px; height: 10px;
-    background-color: rgba(255, 255, 255, 0.4) !important; border-radius: 50%; border: 2px solid #FF6F91;
+    background-color: rgba(255, 255, 255, 0.4) !important; 
+    border-radius: 50%; border: 2px solid #FF6F91;
 }
+
 .root-dot {
     position: absolute; width: 12px; height: 12px;
-    background-color: #00A38C !important; border-radius: 50%; box-shadow: 0 0 10px rgba(0, 163, 140, 0.8) !important;
+    background-color: #00A38C !important; border-radius: 50%; 
+    box-shadow: 0 0 10px rgba(0, 163, 140, 0.8) !important;
 }
+
 .dot-1 { bottom: 80px; left: 15%; }
 .dot-2 { bottom: 50px; left: 25%; }
 .dot-3 { bottom: 100px; left: 50%; }
 .dot-4 { bottom: 60px; left: 65%; }
+
 .curve-label { position: absolute; font-size: 0.7rem; }
 .label-root { bottom: 120px; left: 45%; }
 .label-iterations { bottom: 95px; left: 18%; }
-/* --- 6. FÓRMULAS MATEMÁTICAS (LATEX) --- */
-/* Forzamos a que todas las fórmulas se pinten de azul oscuro */
-.stApp .katex, 
-.stApp .katex * {
-    color: #1a2b4c !important;
+
+@keyframes pulso_raiz {
+    0% { box-shadow: 0 0 0 0 rgba(0, 163, 140, 0.7); }
+    70% { box-shadow: 0 0 0 15px rgba(0, 163, 140, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(0, 163, 140, 0); }
+}
+
+@keyframes flotar {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-8px); }
+    100% { transform: translateY(0px); }
+}
+
+
+/* --- 10. RESPONSIVIDAD (MEDIA QUERIES) --- */
+@media (min-width: 768px) {
+    /* Oculta el botón de "Cerrar" en PC */
+    [data-testid="stSidebarCollapseButton"],
+    [data-testid="collapsedControl"] {
+        display: none !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-inner { flex-direction: column !important; }
+    .hero-text { min-width: unset !important; width: 100% !important; text-align: center !important; }
+    .hero-anim { display: none !important; }
+    .hero-banner { padding: 1.8rem !important; }
+    .hero-banner h1 { font-size: 2.5rem !important; }
+    
+    /* Tablas: permiten scroll horizontal en vez de salirse */
+    .stDataFrame, [data-testid="stDataFrame"] {
+        overflow-x: auto !important;
+        max-width: 100% !important;
+        display: block !important;
+    }
 }

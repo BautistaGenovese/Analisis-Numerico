@@ -102,3 +102,7 @@ def calcular_regresion(datos):
         return None
             ''',
             "python")
+
+if __name__ == "__main__":
+    app = Regresion()
+    app.mostrar_info()
