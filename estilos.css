@@ -25,6 +25,10 @@
     color: #0f172a !important;
 }
 
+/* --- ELIMINAR ÍCONO DE ENLACE EN LOS TÍTULOS --- */
+[data-testid="stHeaderActionElements"] {
+    display: none !important;
+}
 
 /* --- 2. HEADER (BARRA SUPERIOR) --- */
 header[data-testid="stHeader"] {
@@ -60,7 +64,6 @@ header[data-testid="stHeader"] {
 [data-testid="stSidebar"] div[data-testid="stPageLink"]:hover,
 [data-testid="stSidebar"] a[data-testid="stPageLink"]:hover {
     border-color: #3b82f6 !important;     
-    background-color: #f1f5f9 !important; 
     transform: translateX(4px) !important; 
 }
 
@@ -190,6 +193,36 @@ div[data-testid="stDownloadButton"] button:hover span {
     text-align: center !important;
 }
 
+/* Tarjetitas de Nuestro Arsenal Numérico*/
+.metodo-card{
+    border: 1px solid #e2e8f0;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 15px;
+    background: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    transition: all 0.2s ease-in-out !important;
+    /* Bloquea selección del usuario */
+    -webkit-user-select: none; /* Safari */
+    -ms-user-select: none;     /* IE 10+ y Edge */
+    user-select: none;         /* Estándar */
+}
+.metodo-card:hover{
+    border-color: #3b82f6 !important;     
+    background-color: #f1f5f9 !important; 
+    transform: scale(1.01) !important; 
+}
+
+.integrante-escuadron{
+    transition: all 0.2s ease-in-out !important;
+    /* Bloquea selección del usuario */
+    -webkit-user-select: none; /* Safari */
+    -ms-user-select: none;     /* IE 10+ y Edge */
+    user-select: none;         /* Estándar */
+}
+.integrante-escuadron:hover{
+    transform: translateY(-10px);
+}
 
 /* --- 7. CÓDIGO PYTHON Y LATEX --- */
 .stApp div[data-testid="stCodeBlock"] {

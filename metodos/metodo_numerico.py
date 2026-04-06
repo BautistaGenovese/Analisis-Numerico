@@ -10,6 +10,12 @@ class MetodoNumerico(ABC):
         """Nombre del método. Ej: 'Bisección'"""
         pass
     
+    @property
+    @abstractmethod
+    def categoria(self):
+        """Define si el método es cerrado, abierto, etc."""
+        pass
+    
     # En la clase base - por defecto el toggle de las iteraciones existe
     @property
     def tiene_toggle(self):
@@ -111,11 +117,11 @@ class MetodoNumerico(ABC):
             with st.container(border=True):
                 # st.subheader("📥 Ingreso de datos")
                 st.markdown(f"""
-                            <div style='display:flex; align-items:center;'>
-                                <h4 style='margin:auto;'>Parámetros <b style='display:inline; padding:0 4px;  background-color: #cfe5fc; border-radius:5px; margin:auto 0; color:#3b82f6;'>{self.nombre.lower()}</b>
-                                </h4>
-                            </div>
-                                """,unsafe_allow_html=True)
+                <div style='display:flex; align-items:center; flex-wrap: wrap; margin: 8px 0;'>
+                    <h4 style='margin:auto; padding: 6px 8px 8px 0'><b>Parámetros</b></h4>
+                    <b style=' padding:0 4px;  background-color: #cfe5fc; border-radius:3px; margin:auto 0; color:#3b82f6;'>{self.categoria.upper()}</b>
+                </div>
+                    """,unsafe_allow_html=True)
                             
                 f, err, exponente_err = self.render_formula()
                 

@@ -7,6 +7,9 @@ class Secante(MetodoNumerico):
     @property
     def nombre(self): return "Secante"
     
+    @property
+    def categoria(self): return "Método Abierto"  
+    
     def ejecutar(self, f, err, **params):
         return secante(
             f=f,

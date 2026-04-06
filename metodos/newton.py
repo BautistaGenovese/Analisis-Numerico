@@ -7,6 +7,9 @@ class Newton(MetodoNumerico):
     @property
     def nombre(self): return "Newton"
     
+    @property
+    def categoria(self): return "Método Abierto"    
+    
     def ejecutar(self, f, err, **params):
         return newton(
             f=f,

@@ -29,6 +29,9 @@ class Comparacion(MetodoNumerico):
     @property
     def nombre(self): return "Comparación de Métodos"
     
+    @property
+    def categoria(self): return super().categoria    
+    
     def ejecutar(self, f, err, **params):
         return super().ejecutar(f, err, **params)
     

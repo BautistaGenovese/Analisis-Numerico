@@ -43,7 +43,7 @@ def inicio():
     st.markdown("<h3 style='color: #1a2b4c;'>Tabla Comparativa</h3>", unsafe_allow_html=True)
     html_tabla = """
         <div style="overflow-x: auto; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 2rem;">
-            <table style="width:100%; min-width: 600px; text-align: left; border-collapse: collapse; background: white;">
+            <table style="width:100%; min-width: 600px; text-align: left; border-collapse: collapse; background: white; margin: auto;">
                 <tr style="border-bottom: 2px solid #e2e8f0; color: #64748b; font-size: 0.8rem; background-color: #f8fafc;">
                     <th style="padding: 15px; white-space: nowrap;">CARACTERÍSTICA</th>
                     <th style="padding: 15px; white-space: nowrap;">WOLFRAMALPHA</th>
@@ -81,12 +81,12 @@ def inicio():
     colA, colB = st.columns(2)
     with colA:
         st.markdown("<b style='color: #475569;'>🔒 MÉTODOS CERRADOS</b>", unsafe_allow_html=True)
-        st.markdown("""<div style='border: 1px solid #e2e8f0; padding: 20px; border-radius: 12px; margin-bottom: 15px; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.02);'><b style='color:#1a2b4c; font-size: 1.1rem;'>Bisección</b><br><span style='color:#64748b; font-size: 0.9rem;'>El viejo y confiable. Encierra la raíz en un intervalo y lo parte a la mitad.</span></div>""", unsafe_allow_html=True)
-        st.markdown("""<div style='border: 1px solid #e2e8f0; padding: 20px; border-radius: 12px; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.02);'><b style='color:#1a2b4c; font-size: 1.1rem;'>Regula Falsi</b><br><span style='color:#64748b; font-size: 0.9rem;'>Aproximación lineal más rápida que la bisección manteniendo convergencia.</span></div>""", unsafe_allow_html=True)
+        st.markdown("""<div class='metodo-card'><b style='color:#1a2b4c; font-size: 1.1rem;'>Bisección</b><br><span style='color:#64748b; font-size: 0.9rem;'>El viejo y confiable. Encierra la raíz en un intervalo y lo parte a la mitad.</span></div>""", unsafe_allow_html=True)
+        st.markdown("""<div class='metodo-card'><b style='color:#1a2b4c; font-size: 1.1rem;'>Regula Falsi</b><br><span style='color:#64748b; font-size: 0.9rem;'>Aproximación lineal más rápida que la bisección manteniendo convergencia.</span></div><br>""", unsafe_allow_html=True)
     with colB:
         st.markdown("<b style='color: #475569;'>⚡ MÉTODOS ABIERTOS</b>", unsafe_allow_html=True)
-        st.markdown("""<div style='border: 1px solid #e2e8f0; padding: 20px; border-radius: 12px; margin-bottom: 15px; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.02);'><b style='color:#1a2b4c; font-size: 1.1rem;'>Newton-Raphson</b><br><span style='color:#64748b; font-size: 0.9rem;'>Dominador absoluto de los bucles con convergencia cuadrática.</span></div>""", unsafe_allow_html=True)
-        st.markdown("""<div style='border: 1px solid #e2e8f0; padding: 20px; border-radius: 12px; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.02);'><b style='color:#1a2b4c; font-size: 1.1rem;'>Secante</b><br><span style='color:#64748b; font-size: 0.9rem;'>Variante de Newton sin necesidad de derivar analíticamente.</span></div>""", unsafe_allow_html=True)
+        st.markdown("""<div class='metodo-card'><b style='color:#1a2b4c; font-size: 1.1rem;'>Newton-Raphson</b><br><span style='color:#64748b; font-size: 0.9rem;'>Dominador absoluto de los bucles con convergencia cuadrática.</span></div>""", unsafe_allow_html=True)
+        st.markdown("""<div class='metodo-card'><b style='color:#1a2b4c; font-size: 1.1rem;'>Secante</b><br><span style='color:#64748b; font-size: 0.9rem;'>Variante de Newton sin necesidad de derivar analíticamente.</span></div>""", unsafe_allow_html=True)
 
     st.markdown("<br><hr style='border-top: 1px solid #e2e8f0;'><br>", unsafe_allow_html=True)
 
@@ -96,13 +96,13 @@ def inicio():
     
     html_escuadron = """
         <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; text-align: center; margin-top: 30px;">
-            <div><div style="background:#1e293b; color:white; width:60px; height:60px; border-radius:50%; line-height:60px; margin:0 auto; font-weight:bold; font-size: 1.1rem;">BG</div><span style='color:#1e293b; font-size: 0.8rem;'><b>Bautista</b></span></div>
-            <div><div style="background:#e0f2fe; color:#0284c7; width:60px; height:60px; border-radius:50%; line-height:60px; margin:0 auto; font-weight:bold; font-size: 1.1rem;">IG</div><span style='color:#1e293b; font-size: 0.8rem;'><b>Ignacio</b></span></div>
-            <div><div style="background:#f3e8ff; color:#9333ea; width:60px; height:60px; border-radius:50%; line-height:60px; margin:0 auto; font-weight:bold; font-size: 1.1rem;">JG</div><span style='color:#1e293b; font-size: 0.8rem;'><b>Juan</b></span></div>
-            <div><div style="background:#ffedd5; color:#ea580c; width:60px; height:60px; border-radius:50%; line-height:60px; margin:0 auto; font-weight:bold; font-size: 1.1rem;">TK</div><span style='color:#1e293b; font-size: 0.8rem;'><b>Trini</b></span></div>
-            <div><div style="background:#dcfce7; color:#16a34a; width:60px; height:60px; border-radius:50%; line-height:60px; margin:0 auto; font-weight:bold; font-size: 1.1rem;">BR</div><span style='color:#1e293b; font-size: 0.8rem;'><b>Brisa</b></span></div>
-            <div><div style="background:#f1f5f9; color:#475569; width:60px; height:60px; border-radius:50%; line-height:60px; margin:0 auto; font-weight:bold; font-size: 1.1rem;">MV</div><span style='color:#1e293b; font-size: 0.8rem;'><b>Micaías</b></span></div>
-            <div><div style="background:#fef9c3; color:#ca8a04; width:60px; height:60px; border-radius:50%; line-height:60px; margin:0 auto; font-weight:bold; font-size: 1.1rem;">MM</div><span style='color:#1e293b; font-size: 0.8rem;'><b>Manuel</b></span></div>
+            <div class='integrante-escuadron'><div style="background:#1e293b; color:white; width:60px; height:60px; border-radius:50%; line-height:60px; margin:0 auto; font-weight:bold; font-size: 1.1rem;">BG</div><span style='color:#1e293b; font-size: 0.8rem;'><b>Bautista</b></span></div>
+            <div class='integrante-escuadron'><div style="background:#e0f2fe; color:#0284c7; width:60px; height:60px; border-radius:50%; line-height:60px; margin:0 auto; font-weight:bold; font-size: 1.1rem;">IG</div><span style='color:#1e293b; font-size: 0.8rem;'><b>Ignacio</b></span></div>
+            <div class='integrante-escuadron'><div style="background:#f3e8ff; color:#9333ea; width:60px; height:60px; border-radius:50%; line-height:60px; margin:0 auto; font-weight:bold; font-size: 1.1rem;">JG</div><span style='color:#1e293b; font-size: 0.8rem;'><b>Juan</b></span></div>
+            <div class='integrante-escuadron'><div style="background:#ffedd5; color:#ea580c; width:60px; height:60px; border-radius:50%; line-height:60px; margin:0 auto; font-weight:bold; font-size: 1.1rem;">TK</div><span style='color:#1e293b; font-size: 0.8rem;'><b>Trini</b></span></div>
+            <div class='integrante-escuadron'><div style="background:#dcfce7; color:#16a34a; width:60px; height:60px; border-radius:50%; line-height:60px; margin:0 auto; font-weight:bold; font-size: 1.1rem;">BR</div><span style='color:#1e293b; font-size: 0.8rem;'><b>Brisa</b></span></div>
+            <div class='integrante-escuadron'><div style="background:#f1f5f9; color:#475569; width:60px; height:60px; border-radius:50%; line-height:60px; margin:0 auto; font-weight:bold; font-size: 1.1rem;">MV</div><span style='color:#1e293b; font-size: 0.8rem;'><b>Micaías</b></span></div>
+            <div class='integrante-escuadron'><div style="background:#fef9c3; color:#ca8a04; width:60px; height:60px; border-radius:50%; line-height:60px; margin:0 auto; font-weight:bold; font-size: 1.1rem;">MM</div><span style='color:#1e293b; font-size: 0.8rem;'><b>Manuel</b></span></div>
         </div>
     """
     st.markdown(html_escuadron, unsafe_allow_html=True)

@@ -7,6 +7,9 @@ class Regula_Falsi(MetodoNumerico):
     @property
     def nombre(self): return "Regula Falsi"
     
+    @property
+    def categoria(self): return "Método Cerrado"  
+    
     def ejecutar(self, f, err, **params):
         return regula_falsi(
             f=f,

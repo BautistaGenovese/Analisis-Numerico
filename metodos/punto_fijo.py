@@ -8,6 +8,9 @@ class PuntoFijo(MetodoNumerico):
     @property
     def nombre(self): return "Punto Fijo"
     
+    @property
+    def categoria(self): return "Método Abierto"    
+    
     def ejecutar(self, f, err, **params):
         raiz, datos = punto_fijo(
             g=f,

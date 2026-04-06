@@ -7,6 +7,9 @@ class Biseccion(MetodoNumerico):
     @property
     def nombre(self): return "Bisección"
     
+    @property
+    def categoria(self): return "Método Cerrado"
+    
     def ejecutar(self, f, err, **params):
         
         # return raiz, datos

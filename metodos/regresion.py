@@ -17,6 +17,9 @@ class Regresion(MetodoNumerico):
 
     @property
     def nombre(self): return "Regresion"
+    
+    @property
+    def categoria(self): return "Método de Mínimos Cuadrados"
 
     @property
     def tiene_toggle(self): return False
