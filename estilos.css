@@ -121,10 +121,15 @@ div[data-baseweb="number_input"] input {
     font-weight: 600 !important;
     color: #1e293b !important;
 }
+/* Ocultar instrucciones de inputs ("Press Enter to...") */
+[data-testid="InputInstructions"] {
+    display: none !important;
+}
 
 
 /* --- 5. BOTONES (ESTILO UNIFICADO) --- */
 .stButton > button,
+.stFormSubmitButton > button,
 div[data-testid="stDownloadButton"] button {
     background: #cfe5fc !important; 
     border: 1px solid #3b82f6 !important; 
@@ -135,6 +140,9 @@ div[data-testid="stDownloadButton"] button {
 .stButton > button p, 
 .stButton > button span,
 .stButton > button div,
+.stFormSubmitButton > button p, 
+.stFormSubmitButton > button span,
+.stFormSubmitButton > button div,
 div[data-testid="stDownloadButton"] button p,
 div[data-testid="stDownloadButton"] button span {
     color: #3b82f6 !important; 
@@ -142,6 +150,7 @@ div[data-testid="stDownloadButton"] button span {
 }
 
 .stButton > button:hover,
+.stFormSubmitButton > button:hover,
 div[data-testid="stDownloadButton"] button:hover {
     background: #3b82f6 !important; 
     box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3) !important;
@@ -150,6 +159,9 @@ div[data-testid="stDownloadButton"] button:hover {
 .stButton > button:hover p, 
 .stButton > button:hover span,
 .stButton > button:hover div,
+.stFormSubmitButton > button:hover p, 
+.stFormSubmitButton > button:hover span,
+.stFormSubmitButton > button:hover div,
 div[data-testid="stDownloadButton"] button:hover p,
 div[data-testid="stDownloadButton"] button:hover span {
     color: #ffffff !important;

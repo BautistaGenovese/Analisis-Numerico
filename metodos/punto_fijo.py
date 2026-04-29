@@ -40,7 +40,7 @@ class PuntoFijo(MetodoNumerico):
             """)
             st.info(r"💡 **Criterio de Convergencia:** Para que el método no diverja hacia el infinito, la curva de $g(x)$ debe ser 'suave' cerca de la raíz. Matemáticamente, el valor absoluto de su derivada debe ser menor a 1: $|g'(x)| < 1$.")
     
-    def render_formula(self, valor_default=None):
+    def render_formula(self, valor_default=''):
         
         modo = st.radio(
             "¿Cómo deseas ingresar la función?",
@@ -54,17 +54,22 @@ class PuntoFijo(MetodoNumerico):
         )
             
         if modo == "Ingresar g(x) despejada (Recomendado)":
-            g = st.text_input('Escribe tu función despejada $g(x)$:', value='(x + 2)**(0.5)')
-            st.latex('g(x)' + ut.mostrar_formula(g)[4:])
+            g = st.text_input(
+                'Escribe tu función despejada $g(x)$:',
+                value=valor_default,
+                placeholder='Ejemplo: (x + 2)**(0.5)'
+                )
         else:
             
-            f = st.text_input('Escribe tu función original $f(x)$:', value='x**2 - x - 2')
+            f = st.text_input(
+                'Escribe tu función original $f(x)$:',
+                value=valor_default,
+                placeholder='Ejemplo: x**2 - x - 2'
+                )
             st.caption("Transformación aplicada: $g(x) = x - f(x)$")
-            st.latex(ut.mostrar_formula(f))
             
             # Generamos automáticamente el string de la nueva función g(x)
             g = f"x - ({f})"
-            st.latex(f"g(x) = x - ({ut.mostrar_formula(f)[7:]})") # Mostramos cómo quedó
         
         exponente_err = st.select_slider(
             "Presición",
@@ -112,6 +117,9 @@ def punto_fijo (x0, err):
     
     def get_rango_grafico(self, raiz, **params):
         return raiz-5, raiz+5
+    
+    def mostrar_resultados(self, f, raiz, datos, grafico_f):
+        return super().mostrar_resultados('g(x)=' + ut.mostrar_formula(f), raiz, datos, grafico_f)
 
 if __name__ == "__main__":
     app = PuntoFijo()

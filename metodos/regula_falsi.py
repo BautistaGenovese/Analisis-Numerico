@@ -32,7 +32,7 @@ class Regula_Falsi(MetodoNumerico):
             st.markdown("""
             **Intervalos permitidos y Condiciones:**
             * Requiere **un intervalo inicial cerrado** definido por un límite inferior $a$ y un límite superior $b$.
-            * **Es estrictamente necesario** que la función cambie de signo en el intervalo, es decir: $f(a) \cdot f(b) < 0$. De esta forma, nos aseguramos de que la raíz esté "atrapada".
+            * **Es estrictamente necesario** que la función cambie de signo en el intervalo, es decir: $f(a) \\cdot f(b) < 0$. De esta forma, nos aseguramos de que la raíz esté "atrapada".
             * Al ser un método cerrado, siempre converge (siempre encuentra la raíz), aunque puede ser lento si la curva es muy plana en uno de los extremos.
             """)
             st.warning(r"⚠️ **Restricción:** Para evitar la división por cero, las evaluaciones en los extremos no pueden ser iguales: $f(a) \neq f(b)$ (algo que se evita naturalmente gracias a la condición del cambio de signo).")

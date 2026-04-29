@@ -277,162 +277,86 @@ def renderizar_metrica_premium(titulo, valor_izq, valor_der, unidad="", invertid
     </div>
     """, unsafe_allow_html=True)
 
-def dibujar_batalla_errores(historial_izq, historial_der, nombre_izq, nombre_der):
+def dibujar_analisis_errores(historial_izq, historial_der, nombre_izq, nombre_der):
     """
-    Usa Plotly para dibujar el decaimiento del error de ambos métodos
-    en escala logarítmica.
+    Usa Plotly para dibujar el decaimiento del error de ambos métodos en escala logarítmica.
     """
-    
-    # Extraemos los errores de los diccionarios de Historial
     tipo_err = st.session_state.get('tipo_error', 'Absoluto')
     err_izq = historial_izq[f'Error {tipo_err}']
     err_der = historial_der[f'Error {tipo_err}']
     
-    # Creamos los índices de iteraciones (X)
     iter_izq = list(range(1, len(err_izq) + 1))
     iter_der = list(range(1, len(err_der) + 1))
 
-    # Creamos la figura de Plotly
     fig = go.Figure()
 
-    # Traza Azul (Método Izquierdo)
+    # Traza Principal (Método A) - Azul Corporativo
     fig.add_trace(go.Scatter(
-        x=iter_izq, 
-        y=err_izq,
-        mode='lines+markers',
-        name=nombre_izq,
-        line=dict(color='#3b82f6', width=3),
-        marker=dict(size=6)
+        x=iter_izq, y=err_izq, mode='lines+markers', name=f"Método A: {nombre_izq}",
+        line=dict(color='#3b82f6', width=3), marker=dict(size=6)
     ))
 
-    # Traza Roja (Método Derecho)
+    # Traza Secundaria (Método B) - Índigo/Púrpura elegante
     fig.add_trace(go.Scatter(
-        x=iter_der, 
-        y=err_der,
-        mode='lines+markers',
-        name=nombre_der,
-        line=dict(color='#ef4444', width=3, dash='dash'),
-        marker=dict(size=6)
+        x=iter_der, y=err_der, mode='lines+markers', name=f"Método B: {nombre_der}",
+        line=dict(color='#8b5cf6', width=3, dash='dash'), marker=dict(size=6)
     ))
 
     fig.update_layout(
-        title="Batalla de Convergencia: Decaimiento del Error",
+        title=dict(text="Análisis de Convergencia: Decaimiento del Error", font=dict(color='#0f172a')),
         xaxis_title="Número de Iteración",
         yaxis_title="Error (Tolerancia)",
-        
-        # ✅ Mismo template que generar_base_fig
         template='plotly_white',
-        
         yaxis=dict(
-            type="log",
-            tickformat="~g",
-            dtick=1,
-            showgrid=True,
-            gridcolor='rgba(200, 200, 200, 0.2)',  # ✅ Igual que base
-            zeroline=True,
-            zerolinecolor='rgba(176, 196, 222, 0.8)',
-            zerolinewidth=2.5
+            type="log", tickformat="~g", dtick=1, showgrid=True,
+            gridcolor='rgba(200, 200, 200, 0.2)', zeroline=True,
+            zerolinecolor='rgba(176, 196, 222, 0.8)', zerolinewidth=2.5
         ),
         xaxis=dict(
-            showgrid=True,
-            gridcolor='rgba(200, 200, 200, 0.2)',  # ✅ Igual que base
-            zeroline=True,
-            zerolinecolor='rgba(176, 196, 222, 0.8)',
-            zerolinewidth=2.5
+            showgrid=True, gridcolor='rgba(200, 200, 200, 0.2)',
+            zeroline=True, zerolinecolor='rgba(176, 196, 222, 0.8)', zerolinewidth=2.5
         ),
         legend=dict(yanchor="top", y=0.99, xanchor="right", x=0.99),
-        hovermode="x unified",
-        dragmode=False,
-        margin=dict(l=40, r=40, t=60, b=40),
+        hovermode="x unified", dragmode=False, margin=dict(l=40, r=40, t=60, b=40),
     )
 
-    # Renderizamos en Streamlit
     st.plotly_chart(
-        fig,
-        use_container_width=True,
-        config={
-            'scrollZoom': False,
-            'doubleClick': False, # <--- ESTO DESACTIVA EL RESET AL TOCAR
-            'displayModeBar': False,
-            'displaylogo': False,
-            'showTips': False,
-            'modeBarButtons': [[
-                'zoomIn2d', 
-                'zoomOut2d', 
-                'resetViews'
-                ]]
-            }
-        )
+        fig, use_container_width=True,
+        config={'scrollZoom': False, 'doubleClick': False, 'displayModeBar': False, 'displaylogo': False}
+    )
 
-def dibujar_radar_veredicto(nombre_izq, scores_izq, nombre_der, scores_der):
-
-    # Usa Plotly Scatterpolar para dibujar un gráfico de araña comparando múltiples categorías normalizadas (0-10).
-
-    # Categorías para los ejes
-    categorias = ['VELOCIDAD\n(Tiempo/Iters)', 'EFICIENCIA DE COSTO\n(Menos Cálculos)', 'ROBUSTEZ\n(Garantía Conv)']
+def dibujar_radar_analisis(nombre_izq, scores_izq, nombre_der, scores_der):
+    """ Gráfico de araña comparando múltiples categorías normalizadas (0-10). """
+    categorias = ['VELOCIDAD\n(Tiempo/Iters)', 'EFICIENCIA\n(Costo Computacional)', 'ROBUSTEZ\n(Garantía Conv)']
     
-    # El gráfico Scatterpolar de Plotly requiere "cerrar" el círculo
-    # repitiendo el primer puntaje al final.
     scores_izq_cerrado = scores_izq + [scores_izq[0]]
     scores_der_cerrado = scores_der + [scores_der[0]]
     categorias_cerrado = categorias + [categorias[0]]
 
     fig = go.Figure()
 
-    # Traza Azul (Método Izquierdo)
+    # Método A - Azul
     fig.add_trace(go.Scatterpolar(
-        r=scores_izq_cerrado,
-        theta=categorias_cerrado,
-        fill='toself', # Relleno de área
-        name=nombre_izq,
-        line=dict(color='#3b82f6', width=3),
-        marker=dict(size=6)
+        r=scores_izq_cerrado, theta=categorias_cerrado, fill='toself', 
+        name=nombre_izq, line=dict(color='#3b82f6', width=3), marker=dict(size=6)
     ))
 
-    # Traza Roja (Método Derecho)
+    # Método B - Índigo
     fig.add_trace(go.Scatterpolar(
-        r=scores_der_cerrado,
-        theta=categorias_cerrado,
-        fill='toself', # Relleno de área
-        name=nombre_der,
-        line=dict(color='#ef4444', width=3, dash='dash'),
-        marker=dict(size=6)
+        r=scores_der_cerrado, theta=categorias_cerrado, fill='toself', 
+        name=nombre_der, line=dict(color='#8b5cf6', width=3, dash='dash'), marker=dict(size=6)
     ))
 
-    # Configuración del Layout "Mobile-Friendly"
     fig.update_layout(
-        title=dict(
-            text="🏆 Veredicto de Batalla",
-            font=dict(size=16, color='#0f172a')  # ✅ Texto oscuro
-        ),
+        title=dict(text="Desempeño Multi-Criterio", font=dict(size=16, color='#0f172a')),
         polar=dict(
-            radialaxis=dict(
-                visible=True,
-                range=[0, 10],
-                gridcolor='rgba(200, 200, 200, 0.4)',   # ✅ Grilla clara
-                tickfont=dict(color='#64748b', size=10)  # ✅ Gris medio
-            ),
-            angularaxis=dict(
-                tickfont=dict(color='#0f172a', size=11), # ✅ Oscuro, no blanco
-                gridcolor='rgba(200, 200, 200, 0.4)'     # ✅ Grilla clara
-            ),
-            bgcolor='rgba(248, 250, 252, 0.8)'           # ✅ Fondo clarito, no transparente
+            radialaxis=dict(visible=True, range=[0, 10], gridcolor='rgba(200, 200, 200, 0.4)', tickfont=dict(color='#64748b', size=10)),
+            angularaxis=dict(tickfont=dict(color='#0f172a', size=11), gridcolor='rgba(200, 200, 200, 0.4)'),
+            bgcolor='rgba(248, 250, 252, 0.8)'
         ),
-        
-        # ✅ Fondo blanco en vez de transparente (que mostraba el oscuro de abajo)
-        paper_bgcolor='#ffffff',
-        plot_bgcolor='#ffffff',
-        font=dict(color='#0f172a'),  # ✅ Todo el texto oscuro
-        
-        legend=dict(
-            orientation="h",
-            yanchor="top", y=-0.15,
-            xanchor="center", x=0.5,
-            font=dict(color='#0f172a')  # ✅
-        ),
-        margin=dict(l=25, r=25, t=40, b=20),
-        height=350
+        paper_bgcolor='#ffffff', plot_bgcolor='#ffffff', font=dict(color='#0f172a'),
+        legend=dict(orientation="h", yanchor="top", y=-0.15, xanchor="center", x=0.5),
+        margin=dict(l=25, r=25, t=40, b=20), height=350
     )
     
-    # Renderizamos en Streamlit
     st.plotly_chart(fig, width='stretch', config={'staticPlot': True})

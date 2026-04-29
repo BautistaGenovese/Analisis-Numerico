@@ -7,268 +7,222 @@ from metodos.regula_falsi import Regula_Falsi
 from metodos.newton import Newton
 from metodos.punto_fijo import PuntoFijo
 from metodos.secante import Secante
+from core import grafico, utils as ut
 
-from core import grafico
-
-# Instanciamos cada método una sola vez
-# Para agregar uno nuevo: solo agregarlo acá
-METODOS = [
-    Biseccion(),
-    Regula_Falsi(),
-    Newton(),
-    PuntoFijo(),
-    Secante()
-]
-
-# Construimos el diccionario dinámicamente desde las propiedades de cada clase
-# La key es "Bisección", "Newton", etc.
+METODOS = [Biseccion(), Regula_Falsi(), Newton(), PuntoFijo(), Secante()]
 METODOS_DICT = {f"{m.nombre}": m for m in METODOS}
 
 class Comparacion(MetodoNumerico):
     
     @property
-    def nombre(self): return "Comparación de Métodos"
+    def nombre(self): return "Análisis Comparativo"
     
     @property
-    def categoria(self): return super().categoria    
+    def categoria(self): return "HERRAMIENTA DE DIAGNÓSTICO"    
     
-    def ejecutar(self, f, err, **params):
-        return super().ejecutar(f, err, **params)
-    
+    def ejecutar(self, f, err, **params): return super().ejecutar(f, err, **params)
     def render_teoria(self):
-        with st.expander("🥊 ¿Cómo funciona la Arena de Batalla?"):
+        with st.expander("📖 Sobre el Análisis Comparativo"):
             st.markdown("""
-            **Concepto básico:** Esta sección enfrenta a dos algoritmos cara a cara bajo las **mismas condiciones exactas** (misma función $f(x)$ y misma tolerancia). El objetivo no es solo ver quién encuentra la raíz, sino evaluar **qué tan eficientes son** en el proceso.
-            
-            **Métricas de Evaluación:**
-            * ⏱️ **Iteraciones y Tiempo (ms):** Mide la velocidad bruta. Ojo: un método con menos iteraciones no siempre es el más rápido en milisegundos si sus cálculos internos son muy pesados (ej. calcular derivadas complejas).
-            * 🧮 **Cálculos de $f(x)$ (Costo Computacional):** Es la "moneda" del análisis numérico. Métodos como Newton evalúan la función y su derivada en cada paso (costo = 2 por iteración), mientras que la Secante o Regula Falsi reciclan valores anteriores (costo ≈ 1 por iteración después del arranque).
-            * 🛡️ **Robustez:** Es el puntaje teórico de confiabilidad. La Bisección tiene puntaje perfecto porque jamás falla si hay cambio de signo, mientras que los métodos abiertos tienen menor puntaje por su riesgo de divergencia.
-            """)
-            
-            st.info("""
-            📊 **El Veredicto (Gráfico de Radar):** Al final de la batalla, Roooty normaliza estas métricas en una escala del 0 al 10 para trazar un gráfico de radar. 
-            * **Velocidad:** Premia al que tardó menos tiempo.
-            * **Costo:** Premia al que evaluó la función menos veces.
-            * **Robustez:** Evalúa la estabilidad teórica del método.
-            
-            💡 **Tip:** El método ganador suele ser el que dibuja el **área más grande y equilibrada** en el radar. ¡Un Ferrari (Newton) no sirve si se estrella en la primera curva por una división por cero!
+            **Objetivo:** Evaluar el rendimiento relativo de dos algoritmos bajo condiciones idénticas. 
+            Este panel permite contrastar la velocidad de convergencia y el costo computacional de los métodos seleccionados.
             """)
 
-    def render_inputs(self):
-        return super().render_inputs()
-    
-    def mostrar_codigo(self):
-        return super().mostrar_codigo()
-    
-    def get_rango_grafico(self, raiz, **params):
-        return super().get_rango_grafico(raiz, **params)
+    def render_inputs(self): return super().render_inputs()
+    def mostrar_codigo(self): return super().mostrar_codigo()
+    def get_rango_grafico(self, raiz, **params): return super().get_rango_grafico(raiz, **params)
 
     def mostrar_info(self):
         st.title(self.nombre)
-        # st.markdown(f"<h1 style='text-align: center;'>{self.nombre}</h1>", unsafe_allow_html=True)
-        
         self.render_teoria()
         
+        # 🔒 RECUPERAR MEMORIA
+        llave_memoria = "memoria_comparacion"
+        f_guardada = ""
+        if llave_memoria in st.session_state and st.session_state[llave_memoria] is not None:
+            f_guardada = st.session_state[llave_memoria]['f']
+
         with st.container(border=True):
-            st.subheader("📥 Ingreso de datos")
+            # st.markdown("#### 🛠️ Configuración del Análisis")
+            st.markdown(f"""
+                <div style='display:flex; align-items:center; flex-wrap: wrap; margin: 8px 0 15px 0;'>
+                    <h4 style='margin:auto; padding: 6px 8px 8px 0'><b>Configuración del Análisis</b></h4>
+                    <b style=' padding:0 4px; background-color: #cfe5fc; border-radius:3px; margin:auto 0; color:#3b82f6;'>EVALUACIÓN DE RENDIMIENTO</b>
+                </div>
+            """, unsafe_allow_html=True)
             
-            # Datos Globales
-            f, err, exponente_err = self.render_formula()
+            # 1. Función y Tolerancia (Global)
+            f, err, exp_err = self.render_formula(valor_default=f_guardada)
 
-            # Selectores "VS"
-            col1, col2, col3 = st.columns([2, 1, 2], gap="small")
-            with col1:
-                opc1 = st.selectbox('Rincón Azul:', key='opc1', index=None, options=list(METODOS_DICT.keys()))
-            with col2:
-                st.markdown("<h2 style='text-align: center; font-weight:800; margin-top: 15px;'>VS</h2>", unsafe_allow_html=True)
-            with col3:
-                opc2 = st.selectbox('Rincón Rojo:', key='opc2', index=None, options=list(METODOS_DICT.keys()))
+            st.divider()
 
-            if opc1 is None or opc2 is None:
-                st.info('🧮 Selecciona dos métodos en los menús de arriba para comenzar la batalla.')
-            elif opc1 == opc2:
-                st.warning('⚠️ Por favor, elige métodos distintos para poder compararlos.')
-            else:
+            # 2. SELECCIÓN Y PARÁMETROS 
+            col_met_a, col_met_b = st.columns(2, gap="large")
+            
+            with col_met_a:
+                st.markdown("<p style='color: #3b82f6; font-weight: 800; margin-bottom: 0;'>MÉTODO A</p>", unsafe_allow_html=True)
+                opc1 = st.selectbox('Seleccionar Algoritmo', key='opc1', index=None, options=list(METODOS_DICT.keys()), label_visibility="collapsed")
+                
+                params1 = {}
+                if opc1:
+                    with st.container():
+                        params1 = METODOS_DICT[opc1].render_inputs(key=f'inp_{opc1}')
+            
+            with col_met_b:
+                st.markdown("<p style='color: #8b5cf6; font-weight: 800; margin-bottom: 0;'>MÉTODO B</p>", unsafe_allow_html=True)
+                opc2 = st.selectbox('Seleccionar Algoritmo', key='opc2', index=None, options=list(METODOS_DICT.keys()), label_visibility="collapsed")
+                
+                params2 = {}
+                if opc2:
+                    with st.container():
+                        params2 = METODOS_DICT[opc2].render_inputs(key=f'inp_{opc2}')
+
+            st.markdown("<br>", unsafe_allow_html=True)
+            calcular_btn = st.button("🚀 Ejecutar Análisis Comparativo", type="primary", use_container_width=True)
+
+            if calcular_btn:
+                if f.strip() == "" or opc1 is None or opc2 is None:
+                    st.warning("⚠️ Asegúrate de ingresar una función y seleccionar ambos métodos.")
+                elif opc1 == opc2:
+                    st.warning('⚠️ Elige métodos distintos para comparar.')
+                else:
+                    # Ejecución
+                    met1, met2 = METODOS_DICT[opc1], METODOS_DICT[opc2]
+                    
+                    i1 = time.perf_counter()
+                    raiz_1, datos_1 = met1.ejecutar(f, err, **params1)
+                    t1 = (time.perf_counter() - i1) * 1000
+                    
+                    i2 = time.perf_counter()
+                    raiz_2, datos_2 = met2.ejecutar(f, err, **params2)
+                    t2 = (time.perf_counter() - i2) * 1000
+                    
+                    st.session_state[llave_memoria] = {
+                        'f': f, 'opc1': opc1, 'opc2': opc2,
+                        'r1': raiz_1, 'd1': datos_1, 't1': t1, 'p1': params1,
+                        'r2': raiz_2, 'd2': datos_2, 't2': t2, 'p2': params2
+                    }
+
+        # --- PANEL DE RESULTADOS ---
+        if llave_memoria in st.session_state and st.session_state[llave_memoria] is not None:
+            mem = st.session_state[llave_memoria]
+            
+            if mem['r1'] is not None and mem['r2'] is not None:
                 st.divider()
                 
-                metodo1 = METODOS_DICT[opc1]
-                metodo2 = METODOS_DICT[opc2]
+                # TÍTULO SUTIL
+                st.markdown("""
+                    <div style="display: flex; justify-content: center; align-items: center; margin-bottom: 5px; margin-top: 10px;">
+                        <div style="background-color: #f8fafc; padding: 6px 18px; border-radius: 30px; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                            <span style="color: #475569; font-weight: 800; font-size: 0.75rem; letter-spacing: 1.5px;">🔬 FUNCIÓN EN ANÁLISIS</span>
+                        </div>
+                    </div>
+                """, unsafe_allow_html=True)
+
+                # 🚀 FÓRMULA EN TAMAÑO "HUGE"
+                # Usamos \Huge dentro del string de LaTeX para forzar el tamaño máximo de KaTeX
+                formula_latex = ut.mostrar_formula(self.get_formula_grafico(mem['f']))
+                st.latex(f"\\large {formula_latex}")
                 
-                met1, met2 = st.columns(2, gap="large")
-                with met1:
-                    params1 = metodo1.render_inputs(key=f'inp_{opc1}')
-                    inicio1 = time.perf_counter()
-                    raiz_1, datos_1 = metodo1.ejecutar(f,err,**params1)
-                    fin1 = time.perf_counter()
-                    tiempo_1 = (fin1 - inicio1) * 1000
-                    
-                with met2:
-                    params2 = metodo2.render_inputs(key=f'inp_{opc2}')
-                    inicio2 = time.perf_counter()
-                    raiz_2, datos_2 = metodo2.ejecutar(f,err,**params2)
-                    fin2 = time.perf_counter()
-                    tiempo_2 = (fin2 - inicio2) * 1000
+                # Espacio extra para que los gráficos no queden pegados a la fórmula gigante
+                st.markdown("<div style='margin-bottom: 40px;'></div>", unsafe_allow_html=True)
+
+                # SECCIÓN DE GRÁFICOS (Continúa el resto de tu código...)
+                col_g1, col_g2 = st.columns(2)
                 
-                # === MÉTRICAS RÁPIDAS Y GRÁFICO FINAL ===
-                if raiz_1 is not None and raiz_2 is not None:
-                    # Obtengo los límites del grafico 
-                    inf1, sup1 = metodo1.get_rango_grafico(raiz_1,**params1)
-                    inf2, sup2 = metodo2.get_rango_grafico(raiz_2,**params2)
-                    
-                    # Genero los graficos
-                    graf_1 = grafico.obtener_grafico(f, raiz_1, inf1, sup1, key=f'graf_{opc1.lower()}', iteraciones=datos_1.obtener_datos())
-                    graf_2 = grafico.obtener_grafico(f, raiz_2, inf2, sup2, key=f'graf_{opc2.lower()}', iteraciones=datos_2.obtener_datos())
-                    
-                    # Grafico
-                    col_g1, col_g2 = st.columns(2)
-                    with col_g1:
-                        st.success(f'Raíz encontrada en: $x \\approx {raiz_1:.6f}$')
-                        with st.spinner(text='Generando grafica...'):
-                            grafico.dibujar(graf_1,key=f'graf_{opc1.lower()}')
-                    with col_g2:
-                        st.success(f'Raíz encontrada en: $x \\approx {raiz_2:.6f}$')
-                        with st.spinner(text='Generando grafica...'):
-                            grafico.dibujar(graf_2,key=f'graf_{opc2.lower()}')
-                    
-                    with st.expander("📊 Ver tablas detalladas de iteraciones"):
-                        col_t1, col_t2 = st.columns(2)
-                        with col_t1:
-                            st.markdown(f"**{opc1}**")
-                            st.dataframe(datos_1.obtener_dataframe(),width='stretch')
-                        with col_t2:
-                            st.markdown(f"**{opc2}**")
-                            st.dataframe(datos_2.obtener_dataframe(),width='stretch')
-                               
-                    st.divider()
-                    st.subheader("🏆 Resultados de la Comparación")
-                    
-                    # Recuperamos datos crudos
-                    d_izq = datos_1.obtener_datos()
-                    d_der = datos_2.obtener_datos()
-                    iters_1 = len(d_izq['x[i]'])
-                    iters_2 = len(d_der['x[i]'])
+                m1, m2 = METODOS_DICT[mem['opc1']], METODOS_DICT[mem['opc2']]
+                inf1, sup1 = m1.get_rango_grafico(mem['r1'], **mem['p1'])
+                inf2, sup2 = m2.get_rango_grafico(mem['r2'], **mem['p2'])
+                
+                with col_g1:
+                    with st.container(border=True): # ✅ Fondo blanco
+                        st.markdown(f"<p style='text-align: center; color: #3b82f6; font-weight: 700; margin-bottom: 0;'>{mem['opc1'].upper()}</p>", unsafe_allow_html=True)
+                        g1 = grafico.obtener_grafico(mem['f'], mem['r1'], inf1, sup1, key=f"g_{mem['opc1']}", iteraciones=mem['d1'].obtener_datos())
+                        grafico.dibujar(g1, key=f"dg_{mem['opc1']}")
+                
+                with col_g2:
+                    with st.container(border=True): # ✅ Fondo blanco
+                        st.markdown(f"<p style='text-align: center; color: #8b5cf6; font-weight: 700; margin-bottom: 0;'>{mem['opc2'].upper()}</p>", unsafe_allow_html=True)
+                        g2 = grafico.obtener_grafico(mem['f'], mem['r2'], inf2, sup2, key=f"g_{mem['opc2']}", iteraciones=mem['d2'].obtener_datos())
+                        grafico.dibujar(g2, key=f"dg_{mem['opc2']}")
 
-                    costo_1 = 2 + iters_1 if opc1 != "Newton" else 2 * iters_1
-                    costo_2 = 2 + iters_2 if opc2 != "Newton" else 2 * iters_2
-                    
-                    # --- DISEÑO DE BATALLA (Limpio y Nativo) ---
-                    st.markdown("<br>", unsafe_allow_html=True) # Un espaciecito extra para que respire
-                    
-                    # Usamos 2 columnas simples, sin márgenes raros
-                    col_azul, col_rojo = st.columns(2, gap="large")
+                # MÉTRICAS DE RENDIMIENTO HTML
+                d_izq, d_der = mem['d1'].obtener_datos(), mem['d2'].obtener_datos()
+                it1, it2 = len(d_izq['x[i]']), len(d_der['x[i]'])
+                c1 = 2 + it1 if mem['opc1'] != "Newton" else 2 * it1
+                c2 = 2 + it2 if mem['opc2'] != "Newton" else 2 * it2
 
-                    with col_azul:
-                        st.markdown(f"<h3 style='color: #3498DB;'>🔵 {opc1}</h3>", unsafe_allow_html=True)
+                html_kpi = f"""
+                <div style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; margin: 20px 0; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
+                    <div style="display: flex; background: #f8fafc; border-bottom: 1px solid #e2e8f0; padding: 12px;">
+                        <div style="flex: 1; text-align: center; font-weight: 800; color: #3b82f6;">{mem['opc1']}</div>
+                        <div style="flex: 0.8; text-align: center; font-weight: 600; color: #64748b; font-size: 0.8rem; align-self: center;">MÉTRICAS</div>
+                        <div style="flex: 1; text-align: center; font-weight: 800; color: #8b5cf6;">{mem['opc2']}</div>
+                    </div>
+                    <div style="display: flex; border-bottom: 1px solid #f1f5f9; padding: 15px;">
+                        <div style="flex: 1; text-align: center; font-weight: 700; font-size: 1.2rem;">{mem['r1']:.6f}</div>
+                        <div style="flex: 0.8; text-align: center; color: #94a3b8; font-size: 0.8rem; align-self: center;">Raíz Encontrada</div>
+                        <div style="flex: 1; text-align: center; font-weight: 700; font-size: 1.2rem;">{mem['r2']:.6f}</div>
+                    </div>
+                    <div style="display: flex; border-bottom: 1px solid #f1f5f9; padding: 15px; background: #fafafa;">
+                        <div style="flex: 1; text-align: center; font-weight: 700; font-size: 1.2rem;">{it1}</div>
+                        <div style="flex: 0.8; text-align: center; color: #94a3b8; font-size: 0.8rem; align-self: center;">Iteraciones</div>
+                        <div style="flex: 1; text-align: center; font-weight: 700; font-size: 1.2rem;">{it2}</div>
+                    </div>
+                    <div style="display: flex; padding: 15px; border-bottom: 1px solid #f1f5f9;">
+                        <div style="flex: 1; text-align: center; font-weight: 700; font-size: 1.2rem;">{mem['t1']:.3f} ms</div>
+                        <div style="flex: 0.8; text-align: center; color: #94a3b8; font-size: 0.8rem; align-self: center;">Tiempo Ejecución</div>
+                        <div style="flex: 1; text-align: center; font-weight: 700; font-size: 1.2rem;">{mem['t2']:.3f} ms</div>
+                    </div>
+                    <div style="display: flex; padding: 15px; background: #fafafa;">
+                        <div style="flex: 1; text-align: center; font-weight: 700; font-size: 1.2rem;">{c1}</div>
+                        <div style="flex: 0.8; text-align: center; color: #94a3b8; font-size: 0.8rem; align-self: center;">Cálculos de f(x)</div>
+                        <div style="flex: 1; text-align: center; font-weight: 700; font-size: 1.2rem;">{c2}</div>
+                    </div>
+                </div>
+                """
+                st.markdown(html_kpi, unsafe_allow_html=True)
+                
+                st.markdown("<br>", unsafe_allow_html=True)
+                
+                # GRÁFICO DE ERRORES (En contenedor)
+                with st.container(border=True): # Fondo blanco
+                    grafico.dibujar_analisis_errores(d_izq, d_der, mem['opc1'], mem['opc2'])
+                
+                st.markdown("<br>", unsafe_allow_html=True)
+                
+                # RADAR E INFO (En contenedor)
+                col_radar_info, col_radar_plot = st.columns([1, 2], gap="large")
+                
+                with col_radar_info:
+                    # Regresó la interpretación perdida
+                    st.markdown("##### 🎯 Interpretación del Radar")
+                    st.info("""
+                    Este gráfico normaliza las métricas en una escala de eficiencia del 0 al 10.
+                    
+                    - **Mayor área sombreada:** Indica un método globalmente más eficiente.
+                    - **Newton** suele dominar en la *Velocidad* pero flaquea en *Robustez* por requerir derivadas que no se anulen.
+                    - **Bisección** prioriza siempre la *Robustez* (siempre converge) a costa de una menor *Velocidad*.
+                    """)
+
+                with col_radar_plot:
+                    with st.container(border=True): # Fondo blanco
+                        # Lógica de puntajes
+                        min_t = min(mem['t1'], mem['t2'])
+                        s_vel1, s_vel2 = (min_t/mem['t1'])*10, (min_t/mem['t2'])*10
                         
-                        st.metric(label="Raíz encontrada", value=f"{raiz_1:.6f}")
+                        min_c = min(c1, c2)
+                        s_c1, s_c2 = (min_c/c1)*10, (min_c/c2)*10
                         
-                        st.metric(
-                            label="Iteraciones", 
-                            value=iters_1, 
-                            delta=f"{iters_1 - iters_2} pasos", 
-                            delta_color="inverse"
+                        rob = {"Bisección": 10, "Regula Falsi": 6.5, "Secante": 6.5, "Newton": 4, "Punto Fijo": 5}
+                        
+                        grafico.dibujar_radar_analisis(
+                            mem['opc1'], [s_vel1, s_c1, rob.get(mem['opc1'], 5)], 
+                            mem['opc2'], [s_vel2, s_c2, rob.get(mem['opc2'], 5)]
                         )
-                        
-                        st.metric(
-                            label="Tiempo (ms)", 
-                            value=f"{tiempo_1:.3f}", 
-                            delta=f"{(tiempo_1 - tiempo_2):.3f} ms", 
-                            delta_color="inverse"
-                        )
-                        
-                        st.metric(
-                            label="Cálculos de f(x)", 
-                            value=costo_1, 
-                            delta=f"{costo_1 - costo_2} cálculos", 
-                            delta_color="inverse"
-                        )
 
-                    with col_rojo:
-                        st.markdown(f"<h3 style='color: #E74C3C;'>🔴 {opc2}</h3>", unsafe_allow_html=True)
-                        
-                        st.metric(label="Raíz encontrada", value=f"{raiz_2:.6f}")
-                        
-                        st.metric(
-                            label="Iteraciones", 
-                            value=iters_2, 
-                            delta=f"{iters_2 - iters_1} pasos", 
-                            delta_color="inverse"
-                        )
-                        
-                        st.metric(
-                            label="Tiempo (ms)", 
-                            value=f"{tiempo_2:.3f}", 
-                            delta=f"{(tiempo_2 - tiempo_1):.3f} ms", 
-                            delta_color="inverse"
-                        )
-                        
-                        st.metric(
-                            label="Cálculos de f(x)", 
-                            value=costo_2, 
-                            delta=f"{costo_2 - costo_1} cálculos", 
-                            delta_color="inverse"
-                        )
-                        
-                    grafico.dibujar_batalla_errores(
-                        datos_1.obtener_datos(), 
-                        datos_2.obtener_datos(), 
-                        opc1, 
-                        opc2
-                    )
-                    
-                    # === NUEVA ZONA DEL VEREDICTO FINAL ===
-                    st.write("#### Análisis Multi-Criterio")
-                    col_ver1, col_ver2 = st.columns([1, 2], gap="large")
-
-                    # --- A. Lógica de Puntuación (Normalización) ---
-                    # Para velocidad y costo, "menos" es "mejor". Queremos puntajes 0-10 donde 10 es "menos".
-                    # Usamos una normalización simple: (valor_min / valor_actual) * 10.
-                    
-                    # Categoría: VELOCIDAD (Tiempo o Iters)
-                    # Usamos tiempo de ejecución si lo mediste (ver Turn 22), o iters como respaldo.
-                    min_time = min(tiempo_1, tiempo_2)
-                    score_vel_izq = (min_time / tiempo_1) * 10
-                    score_vel_der = (min_time / tiempo_2) * 10
-
-                    # Categoría: COSTO (Evaluaciones Totales)
-                    min_cost = min(costo_1, costo_2)
-                    score_costo_izq = (min_cost / costo_1) * 10
-                    score_costo_der = (min_cost / costo_2) * 10
-
-                    # Categoría: ROBUSTEZ (Puntaje cualitativo conocido en Análisis Numérico)
-                    robustness_scores = {
-                        "Bisección": 10.0, # Garantizado si hay cambio de signo
-                        "Regula Falsi": 6.5,   # Prima hermana de la secante, misma robustez
-                        "Secante": 6.5,    # Abierto, pero más estable
-                        "Newton": 4.0,     # Rápido pero diverge fácil por f'(x) = 0
-                        "Punto Fijo": 5.0  # Muy dependiente del despeje
-                    }
-                    
-                    score_robust_izq = robustness_scores.get(opc1, 5.0)
-                    score_robust_der = robustness_scores.get(opc2, 5.0)
-
-                    # Armamos las listas de puntajes para cada método [Vel, Costo, Robust]
-                    scores_izq = [score_vel_izq, score_costo_izq, score_robust_izq]
-                    scores_der = [score_vel_der, score_costo_der, score_robust_der]
-
-                    # --- B. Renderizado del Gráfico de Radar ---
-                    with col_ver2:
-                        # ¡Aquí está la gráfica de celulares que querías!
-                        grafico.dibujar_radar_veredicto(opc1, scores_izq, opc2, scores_der)
-
-                    # --- C. Veredicto de Texto (Opcional, en la columna izquierda) ---
-                    with col_ver1:
-                        st.markdown("##### Interpretación")
-                        st.write("""
-                        Este gráfico de radar muestra el equilibrio de poder de los métodos en una escala del 0 al 10.
-                        - **Mayor área:** Método más 'equilibrado' para esta función específica.
-                        - **Newton** suele ganar en *Velocidad* pero perder en *Robustez*.
-                        - **Bisección** siempre ganará en *Robustez* pero perderá en *Velocidad*.
-                        """)
-
-                else:
-                    st.error('😥 No se ha encontrado la raíz o uno de los métodos diverge.')
+            else:
+                st.error('Divergencia detectada en uno de los métodos. No es posible generar el análisis.')
 
 if __name__ == "__main__":
     app = Comparacion()

@@ -3,16 +3,15 @@ import pandas as pd
 from metodos.metodo_numerico import MetodoNumerico
 from core.algoritmos import regresion
 from core import grafico
+from core import utils as ut
 
 class Regresion(MetodoNumerico):
-    
     """
     El orden de ejecución en `mostrar_info` garantiza que esto funcione:
-
-    1. ejecutar()            → guarda self._m, self._b, self._r2
-    2. get_formula_grafico() → los usa para armar el string
-    3. get_rango_grafico()   → usa self._x_vals
-    4. mostrar_resultados()  → muestra self._m, self._b
+        1. ejecutar()            → guarda self._m, self._b, self._r2
+        2. get_formula_grafico() → los usa para armar el string
+        3. get_rango_grafico()   → usa self._x_vals
+        4. mostrar_resultados()  → muestra self._m, self._b
     """
 
     @property
@@ -24,51 +23,88 @@ class Regresion(MetodoNumerico):
     @property
     def tiene_toggle(self): return False
 
-    # ✅ Pisa render_formula: en vez de text_input, muestra la tabla
     def render_formula(self, valor_default=None):
         st.info("💡 Edita la tabla directamente. Toca la fila vacía al final para agregar más puntos.")
         
-        df_base = pd.DataFrame({"x": [1.0, 2.0, 3.0], "y": [2.1, 4.0, 6.2]})
+        # Si venimos de la memoria, valor_default es una tupla: (x_vals, y_vals)
+        if isinstance(valor_default, tuple) and len(valor_default) == 2:
+            df_base = pd.DataFrame({"x": valor_default[0], "y": valor_default[1]})
+        else:
+            df_base = pd.DataFrame({"x": [], "y": []})
+            
         df_usuario = st.data_editor(df_base, num_rows="dynamic", width='stretch')
         
         x_vals = df_usuario["x"].dropna().tolist()
         y_vals = df_usuario["y"].dropna().tolist()
         
-        # Devuelve la misma estructura (f, err, exponente_err)
-        # f en este caso son los datos crudos empaquetados como string
-        # err y exponente no aplican, devolvemos None
-        
         return (x_vals, y_vals), None, None
 
-    def render_inputs(self,key=None):
-        return {}  # Mochila vacía, no necesita nada más
+    def render_inputs(self, key=None):
+        return {} 
+
+    def _asegurar_estado(self, f):
+        """Si la página se recarga, los atributos _m, _b, etc., no existen en esta instancia. 
+        Esto los reconstruye instantáneamente usando los datos de la memoria."""
+        if not hasattr(self, '_m'):
+            x_vals, y_vals = f
+            m, b, _, r2, _ = regresion(x_vals, y_vals)
+            self._m = m
+            self._b = b
+            self._r2 = r2
+            self._x_vals = x_vals
 
     def ejecutar(self, f, err, **params):
         x_vals, y_vals = f
         m, b, raiz, r2, datos = regresion(x_vals, y_vals)
 
-        # Guardamos los extras como atributos
         self._m = m
         self._b = b
         self._r2 = r2
         self._x_vals = x_vals
 
-        return raiz, datos  # ← Misma firma que todos ✅
+        return raiz, datos 
     
     def get_formula_grafico(self, f):
-        # String válido para el gráfico
-        return f"{self._m}*x + {self._b}"
+        self._asegurar_estado(f) # Reconstruye si es necesario
+        return f"{self._m:.4f}*x + {self._b:.4f}"
 
     def get_rango_grafico(self, raiz, **params):
+        # Como aquí no recibimos 'f' en los parámetros directos, la buscamos en la caja fuerte
+        memoria = st.session_state.get(f"memoria_{self.nombre}")
+        if memoria and 'f' in memoria:
+            self._asegurar_estado(memoria['f'])
+            
+        # Fallback de seguridad extrema
+        if not hasattr(self, '_x_vals'):
+            return raiz - 5, raiz + 5
+            
         return min(raiz, min(self._x_vals)) - 1, max(raiz, max(self._x_vals)) + 1
 
-    def mostrar_resultados(self, raiz, datos, grafico_f):
-        st.metric(label="✅ Raíz encontrada $(x)$", value=f"${raiz:.6f}$")
-        grafico.dibujar(grafico_f)
+    # ✅ 3. ACTUALIZACIÓN DE FIRMA (agregamos 'f' para que coincida con la base)
+    def mostrar_resultados(self, f, raiz, datos, grafico_f):
+        self._asegurar_estado(f) # Reconstruye si es necesario
+        
+        st.markdown("<p style='text-align: center; color: #64748b; font-size: 0.85rem; font-weight: 700; margin-bottom: -15px; letter-spacing: 1px;'>FUNCIÓN APROXIMADA</p>", unsafe_allow_html=True)
+        st.latex(ut.mostrar_formula(self.get_formula_grafico(f)))
+
+        html_metricas = f"""
+        <div style="display: flex; justify-content: space-evenly; align-items: center; background-color: #f8fafc; padding: 12px; border-radius: 10px; border: 1px solid #e2e8f0; margin-top: 15px; margin-bottom: 10px;">
+            <div style="text-align: center;">
+                <p style="color: #64748b; font-size: 0.80rem; font-weight: 600; margin: 0; padding-bottom: 2px;">Raíz encontrada</p>
+                <p style="color: #0f172a; font-size: 1.5rem; font-weight: 800; margin: 0;">{raiz:.12f}</p>
+            </div>
+        </div>
+        """
+        st.markdown(html_metricas, unsafe_allow_html=True)
+
+        with st.spinner(text='Generando grafica...'):
+            grafico.dibujar(grafico_f)
+            
         with st.expander("📊 Ver métricas del modelo"):
-            st.write(f"- **Pendiente ($m$):** `{self._m:.4f}`")
-            st.write(f"- **Ordenada al origen ($b$):** `{self._b:.4f}`")
-            st.write(f"- **Coeficiente de determinación ($R^2$):** `{self._r2:.4f}`")
+            st.write(f"- **Raíz ($x$):** `{raiz}`")
+            st.write(f"- **Pendiente ($m$):** `{self._m}`")
+            st.write(f"- **Ordenada al origen ($b$):** `{self._b}`")
+            st.write(f"- **Coeficiente de determinación ($R^2$):** `{self._r2}`")
             
     def render_teoria(self):
         with st.expander("📖 ¿Cómo funciona la Regresión Lineal?"):
