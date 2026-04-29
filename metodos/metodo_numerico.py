@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 import streamlit as st
-from streamlit_extras.skeleton import *
 from core import grafico, utils as ut
 
 class MetodoNumerico(ABC):
