@@ -321,7 +321,7 @@ def dibujar_analisis_errores(historial_izq, historial_der, nombre_izq, nombre_de
     )
 
     st.plotly_chart(
-        fig, use_container_width=True,
+        fig, width='stretch',
         config={'scrollZoom': False, 'doubleClick': False, 'displayModeBar': False, 'displaylogo': False}
     )
 

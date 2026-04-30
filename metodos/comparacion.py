@@ -52,7 +52,7 @@ class Comparacion(MetodoNumerico):
             """, unsafe_allow_html=True)
             
             # 1. Función y Tolerancia (Global)
-            f, err, exp_err = self.render_formula(valor_default=f_guardada)
+            f, err = self.formula_inputs(valor_default=f_guardada)
 
             st.divider()
 
@@ -78,7 +78,7 @@ class Comparacion(MetodoNumerico):
                         params2 = METODOS_DICT[opc2].render_inputs(key=f'inp_{opc2}')
 
             st.markdown("<br>", unsafe_allow_html=True)
-            calcular_btn = st.button("🚀 Ejecutar Análisis Comparativo", type="primary", use_container_width=True)
+            calcular_btn = st.button("🚀 Ejecutar Análisis Comparativo", type="primary", width='stretch')
 
             if calcular_btn:
                 if f.strip() == "" or opc1 is None or opc2 is None:

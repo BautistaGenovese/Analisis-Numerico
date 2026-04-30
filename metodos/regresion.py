@@ -23,7 +23,7 @@ class Regresion(MetodoNumerico):
     @property
     def tiene_toggle(self): return False
 
-    def render_formula(self, valor_default=None):
+    def formula_inputs(self, valor_default=None):
         st.info("💡 Edita la tabla directamente. Toca la fila vacía al final para agregar más puntos.")
         
         # Si venimos de la memoria, valor_default es una tupla: (x_vals, y_vals)

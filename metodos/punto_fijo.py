@@ -40,7 +40,7 @@ class PuntoFijo(MetodoNumerico):
             """)
             st.info(r"💡 **Criterio de Convergencia:** Para que el método no diverja hacia el infinito, la curva de $g(x)$ debe ser 'suave' cerca de la raíz. Matemáticamente, el valor absoluto de su derivada debe ser menor a 1: $|g'(x)| < 1$.")
     
-    def render_formula(self, valor_default=''):
+    def formula_inputs(self, valor_default=''):
         
         modo = st.radio(
             "¿Cómo deseas ingresar la función?",
@@ -80,7 +80,7 @@ class PuntoFijo(MetodoNumerico):
         # Por ejemplo: 10^(-2)
         err = 10**(-exponente_err)
         
-        return g, err, exponente_err
+        return g, err
     
     def render_inputs(self,key=None):
         x_0 = st.number_input('Ingresar $(x_0)$',value=0.0,step=2.0,key=key)

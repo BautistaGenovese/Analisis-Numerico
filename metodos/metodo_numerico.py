@@ -67,7 +67,7 @@ class MetodoNumerico(ABC):
                         </div>
                     """, unsafe_allow_html=True)
 
-    def render_formula(self, valor_default = ''):
+    def formula_inputs(self, valor_default = ''):
         f = st.text_input(
             'Función $f(x)$:',
             value=valor_default,
@@ -85,7 +85,7 @@ class MetodoNumerico(ABC):
             )
         # Por ejemplo: 10^(-2)
         err = 10**(-exponente_err)
-        return f, err, exponente_err
+        return f, err
     
     def mostrar_resultados(self, f, raiz, datos, grafico_f):
         
@@ -142,10 +142,10 @@ class MetodoNumerico(ABC):
                 </div>
                 """, unsafe_allow_html=True)
 
-                f, err, exponente_err = self.render_formula(valor_default=f_guardada)
+                f, err = self.formula_inputs(valor_default=f_guardada)
                 params = self.render_inputs(key=self.nombre)
                 
-                calcular_btn = st.button("🚀 Calcular y Graficar", type="primary", use_container_width=True)
+                calcular_btn = st.button("🚀 Calcular y Graficar", type="primary", width='stretch')
                 
                 # --- Lógica de ejecución ---
                 if calcular_btn:
