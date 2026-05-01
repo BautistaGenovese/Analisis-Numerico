@@ -6,6 +6,48 @@ import streamlit as st
 import sympy as sp
 from sympy.parsing.sympy_parser import parse_expr, standard_transformations, implicit_multiplication_application
 
+def limpiar_entrada_matematica(formula_str):
+    """
+    Limpia, valida y traduce la fórmula matemática ingresada por el usuario
+    antes de enviarla al motor de SymPy.
+    """
+    # 1. Bloqueo de inecuaciones y comparaciones
+    if re.search(r'[<>=?]', formula_str):
+        raise ValueError("Error: No se permiten inecuaciones ni igualdades (<, >, =). Ingresa solo la función f(x).")
+        
+    # 2. Bloqueo de listas y conjuntos
+    if re.search(r'[\{\}\[\]]', formula_str):
+        raise ValueError("Error: Usa solo paréntesis curvos () para agrupar elementos.")
+        
+    # 3. Bloqueo de caracteres no permitidos (emojis, símbolos especiales)
+    if re.search(r'[^a-zA-Z0-9\+\-\*\/\(\)\.\,\!\^\s\|]', formula_str):
+        raise ValueError("Error: Se detectaron caracteres inválidos o emojis en la fórmula.")
+
+    # 4. Estandarización a minúsculas y LIMPIEZA BÁSICA ORIGINAL
+    f_limpia = formula_str.lower()
+    f_limpia = f_limpia.replace('^', '**').replace(',', '.')
+    
+    # 5. Diccionario de traducciones (usando \b para límites de palabra exactos)
+    reemplazos = {
+        r'\bsen\b': 'sin',         
+        r'\btg\b': 'tan',          
+        r'\barcsen\b': 'asin',     
+        r'\barccos\b': 'acos',     
+        r'\barctg\b': 'atan',      
+        r'\barctan\b': 'atan',     
+        r'\bln\b': 'log',          
+        r'\be\b': 'exp(1)'         
+    }
+    
+    # Aplicamos todas las traducciones del diccionario
+    for patron, sustitucion in reemplazos.items():
+        f_limpia = re.sub(patron, sustitucion, f_limpia)
+    
+    # 6. Traducción del módulo: convertimos |algo| en Abs(algo)
+    f_limpia = re.sub(r'\|(.*?)\|', r'Abs(\1)', f_limpia)
+    
+    return f_limpia
+
 # --- 🚀 NUEVA FUNCIÓN COMPILADORA CON SYMPY ---
 @st.cache_resource
 def obtener_funcion_optimizada(formula_str, trig_mode):
@@ -13,23 +55,36 @@ def obtener_funcion_optimizada(formula_str, trig_mode):
     Usa SymPy para entender el álgebra real (incluyendo multiplicaciones implícitas)
     y 'lambdify' para compilarlo en una función rapidísima de NumPy.
     """
-    # Limpieza básica para facilitar el tipeo del usuario
-    formula_limpia = formula_str.replace('^', '**').replace(',', '.')
+    # 1. Pasamos la fórmula cruda por nuestra capa centralizada de sanitización
+    formula_limpia = limpiar_entrada_matematica(formula_str)
 
-    # Le decimos a SymPy que aplique sus transformaciones estándar
-    # MÁS la multiplicación implícita (para que entienda "4(x-1)" o "x(x+2)")
+    # 2. Le decimos a SymPy que aplique sus transformaciones estándar y multiplicación implícita
     transformaciones = (standard_transformations + (implicit_multiplication_application,))
 
     try:
-        # Convierte el texto en una expresión matemática simbólica
+        # Convierte el texto limpio en una expresión matemática simbólica
         expr = parse_expr(formula_limpia, transformations=transformaciones)
     except Exception as e:
         raise ValueError("Error de sintaxis matemática. Verifica paréntesis y operadores.")
 
-    # Manejo del modo de Trigonometría
+    # 🔥 3. NUEVO: AUDITORÍA ESTRICTA DE VARIABLES 🔥
+    # Le preguntamos a SymPy qué variables (símbolos libres) detectó en la ecuación
+    simbolos_encontrados = expr.free_symbols
+    variable_permitida = sp.Symbol('x')
+
+    # Revisamos si hay intrusos
+    for simbolo in simbolos_encontrados:
+        if simbolo != variable_permitida:
+            # Si el usuario escribió "ex" todo junto, SymPy lo separa como e * x.
+            # Capturamos ese error específico para guiar al usuario.
+            if str(simbolo) == 'e':
+                raise ValueError("Error: Para usar la constante de Euler, sepárala (ej: e*x) o usa exp(x).")
+            else:
+                # Bloquea cualquier "jeje" o "kakaka" informando la letra conflictiva
+                raise ValueError(f"Error: Letra o variable '{simbolo}' no permitida. Solo usa la variable 'x'.")
+
+    # 4. Manejo del modo de Trigonometría
     if trig_mode == 'Grados':
-        # Si el usuario quiere grados, reescribimos las funciones de numpy
-        # para que conviertan automáticamente de grados a radianes
         custom_math = {
             'sin': lambda val: np.sin(np.radians(val)),
             'cos': lambda val: np.cos(np.radians(val)),
@@ -38,15 +93,21 @@ def obtener_funcion_optimizada(formula_str, trig_mode):
         }
         modulos = [custom_math, 'numpy']
     else:
-        # En modo Radianes, usamos el numpy nativo que es ultra rápido
+        # En modo Radianes, usamos el numpy nativo
         modulos = ['numpy']
 
-    # lambdify crea una función de Python nativa a partir de la expresión de SymPy
+    # 5. Compilación final
     return sp.lambdify('x', expr, modules=modulos)
-
 
 # --- 🛠️ FUNCIÓN evaluar_f ACTUALIZADA ---
 def evaluar_f(formula, x=0):
+    # --- 🔥 ESCUDO ANTI-ERRORES DE CACHÉ 🔥 ---
+    # Si 'formula' es una lista o tupla (como los datos de Regresión)
+    # bloqueamos el paso. El caché de Streamlit explota si le mandas listas.
+    if not isinstance(formula, str):
+        return None 
+    # ------------------------------------------
+
     # 1. TRUNCAMIENTO DE LA ENTRADA (Si está activado)
     if st.session_state.get('simular_truncamiento', False):
         decs = st.session_state.get('decimales_trunc', 4)
@@ -59,14 +120,11 @@ def evaluar_f(formula, x=0):
         # Obtenemos la función compilada (instantáneo por el caché)
         funcion_matematica = obtener_funcion_optimizada(formula, trig_mode)
 
-        # Evaluamos la función con el valor de x.
-        # ¡Magia! Si x es un número, devuelve un número. Si x es un array de numpy (como en los gráficos), devuelve un array.
+        # Evaluamos la función
         resultado = funcion_matematica(x)
 
-        # 3. TRUNCAMIENTO DE LA SALIDA (Si está activado)
+        # 3. TRUNCAMIENTO DE LA SALIDA
         if st.session_state.get('simular_truncamiento', False):
-            # Si el resultado es un array (graficando), no truncamos aquí para no romper numpy.
-            # Solo truncamos si es un cálculo numérico individual (escalar)
             if isinstance(resultado, (int, float, np.floating)):
                 resultado = round(float(resultado), decs)
 
@@ -80,7 +138,7 @@ def evaluar_f(formula, x=0):
         raise ValueError(f"Término no reconocido o error en la evaluación: {e}")
 
 def mostrar_formula(formula):
-    f = formula.replace('**','^').replace('sen','sin').replace('.', ',')
+    f = formula.replace('**','^').replace('sen','sin').replace(',', '.')
 
     f = re.sub(r'\((.*?)\)/\(?([a-zA-Z0-9.x\s\+\-\*]+)\)?', r'\\frac{\1}{\2}', f)
 

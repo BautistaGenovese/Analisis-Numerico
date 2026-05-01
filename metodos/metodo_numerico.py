@@ -68,11 +68,18 @@ class MetodoNumerico(ABC):
                     """, unsafe_allow_html=True)
 
     def formula_inputs(self, valor_default = ''):
+        # Creamos un identificador único para este input
+        input_key = f"input_formula_{self.nombre}"
+
+        # Si la llave no existe en la sesión (primera vez que entra), le inyectamos la memoria.
+        if input_key not in st.session_state and valor_default != "":
+            st.session_state[input_key] = valor_default
+
         f = st.text_input(
             'Función $f(x)$:',
-            value=valor_default,
+            key=input_key,
             placeholder='Ejemplo: x**2 + 11*x - 6'
-            )
+        )
         st.caption("Usa `( )` para agrupar elementos. Por ejemplo `e^(1-x)` para $$ e^{1-x}$$.")
         
         st.space(size='small')
@@ -82,8 +89,8 @@ class MetodoNumerico(ABC):
             options=[1,2,3,4,5,6,7,8,9,10],
             value=2,
             format_func=lambda x: f"$10^{{{-int(x)}}}$"
-            )
-        # Por ejemplo: 10^(-2)
+        )
+        
         err = 10**(-exponente_err)
         return f, err
     
@@ -119,7 +126,6 @@ class MetodoNumerico(ABC):
         # 4. TABLA
         with st.expander("Ver tabla de iteraciones"):
             st.dataframe(datos.obtener_dataframe(), width='stretch', hide_index=False)
-
 
     def mostrar_info(self):
         st.title(f'Método {self.nombre}')

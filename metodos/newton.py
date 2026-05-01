@@ -1,5 +1,10 @@
 import streamlit as st
 from metodos.metodo_numerico import MetodoNumerico
+
+from core.utils import limpiar_entrada_matematica 
+from sympy.parsing.sympy_parser import parse_expr, standard_transformations, implicit_multiplication_application
+import sympy as sp
+
 from core.algoritmos import newton
 
 class Newton(MetodoNumerico):
@@ -11,8 +16,18 @@ class Newton(MetodoNumerico):
     def categoria(self): return "Método Abierto"    
     
     def ejecutar(self, f, err, **params):
+        # 1. PASAMOS LA FÓRMULA POR EL FILTRO ANTES DE DERIVAR
+        f_limpia = limpiar_entrada_matematica(f)
+
+        # 2. Configuración para que SymPy entienda el texto
+        transformaciones = (standard_transformations + (implicit_multiplication_application,))
+        expr = parse_expr(f_limpia, transformations=transformaciones)
+        
+        # Volvemos a convertirlo en texto (str) para que pase nuestro escudo de la función evaluar_f sin problemas.
+        f_texto = str(expr)
+        
         return newton(
-            f=f,
+            f=f_texto,
             x_0=params['x_0'],
             err=err
             )

@@ -37,7 +37,7 @@ class Regresion(MetodoNumerico):
         x_vals = df_usuario["x"].dropna().tolist()
         y_vals = df_usuario["y"].dropna().tolist()
         
-        return (x_vals, y_vals), None, None
+        return (x_vals, y_vals), None
 
     def render_inputs(self, key=None):
         return {} 
